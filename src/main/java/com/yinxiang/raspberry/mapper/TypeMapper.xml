@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yinxiang.raspberry.mapper.TypeMapper">
+
+    <!--传感器数据的列名-->
+    <sql id="Column">
+        id, name, sensor_number, sensor_value, description
+    </sql>
+    <!--传感器数据的表名-->
+    <sql id="Table">
+        type
+    </sql>
+
+    <select id="findDataById" resultType="com.yinxiang.raspberry.bean.Type" parameterType="java.lang.Long">
+        select
+        <include refid="Column"/>
+        from
+        <include refid="Table"/>
+        where id = #{type_id}
+    </select>
+</mapper>

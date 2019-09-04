@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yinxiang.raspberry.mapper.LocationMapper">
+    <resultMap id="LocationMap" type="com.yinxiang.raspberry.bean.Location">
+        <result column="id" property="device_id" />
+        <result column="latitude" property="latitude" />
+        <result column="longitude" property="longitude" />
+        <result column="area_name" property="area" />
+        <result column="status_name" property="status" />
+    </resultMap>
+
+    <resultMap id="AreaMap" type="com.yinxiang.raspberry.bean.Area">
+        <result column="areaname" property="area_name"></result>
+    </resultMap>
+
+    <!--GPS的列名-->
+    <sql id="Column">
+        id, latitude, longitude
+    </sql>
+
+    <!--GPS的表名-->
+    <sql id="Table">
+        device
+    </sql>
+
+    <!--1.获取单个设备的GPS数据-->
+    <select id="findDataById" resultType="com.yinxiang.raspberry.bean.Location" parameterType="java.lang.String">
+       select
+        a.id as device_id, a.latitude, a.longitude, b.areaname as area, d.name as status
+        from
+        device a, area b, device_status c, status d
+        where
+        a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id and a.id = #{device_id}
+    </select>
+
+    <select id="findAllArea"  resultMap="AreaMap">
+        select
+        areaname
+        from
+        area
+    </select>
+
+    <!--2.获取所有设备的GPS数据-->
+    <select id="findAllData" resultMap="LocationMap">
+        select
+        a.id, a.latitude, a.longitude, b.areaname as area_name, d.name as status_name
+        from
+        device a, area b, device_status c, status d
+        where
+        a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id
+    </select>
+
+    <select id="findDataByArea" resultMap="LocationMap" parameterType="java.lang.String">
+        select
+        a.id, a.latitude, a.longitude, b.areaname as area_name, d.name as status_name
+        from
+        device a, area b, device_status c, status d
+        where
+        a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id and b.areaname = #{area_name}
+    </select>
+
+<!--    &lt;!&ndash;3.新增设备的GPS数据&ndash;&gt;
+    <insert id="saveData" parameterType="com.yinxiang.raspberry.bean.Location">
+        insert into
+        <include refid="Table"></include>
+        (<include refid="Column"></include>)
+        VALUES
+        (#{device_id},#{latitude},#{longitude})
+    </insert>
+
+    &lt;!&ndash;4.修改设备的GPS数据&ndash;&gt;
+    <update id="modifyData" parameterType="com.yinxiang.raspberry.bean.Location">
+        update
+        <include refid="Table"></include>
+        set
+        <if test="latitude!=null">
+            latitude = #{latitude},
+        </if>
+        <if test="longitude!=null">
+            longitude = #{longitude},
+        </if>
+        where
+        id = #{device_id}
+    </update>
+
+    &lt;!&ndash;5.删除设备的GPS数据&ndash;&gt;
+    <delete id="deleteData" parameterType="java.lang.String">
+        delete from
+        <include refid="Table"></include>
+        where
+        id = #{device_id}
+    </delete>-->
+</mapper>

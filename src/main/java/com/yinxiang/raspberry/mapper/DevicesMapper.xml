@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yinxiang.raspberry.mapper.DevicesMapper">
+    <resultMap id="WaterMap" type="com.yinxiang.raspberry.bean.Device">
+        <result column="id" property="device_id" />
+        <result column="type_id" property="type_id" />
+        <result column="sensor_value" property="sensor_value" />
+        <result column="description" property="description" />
+    </resultMap>
+
+    <resultMap id="ErrMap" type="com.yinxiang.raspberry.bean.ErrDevices">
+        <result column="device_id" property="device_id"></result>
+        <result column="create_time" property="create_time"/>
+        <result column="description" property="description"/>
+        <result column="area_name" property="area_name"/>
+    </resultMap>
+
+    <!--设备的列名-->
+    <sql id="device_column">
+        id, type_id, sensor_value, description
+    </sql>
+
+    <!--设备的表名-->
+    <sql id="device_table">
+        device
+    </sql>
+
+    <!--设备状态的表名-->
+    <sql id="status_table">
+        device_status
+    </sql>
+
+    <sql id="database">
+        intellControl
+    </sql>
+
+    <sql id="err_table">
+        err_devices
+    </sql>
+
+    <select id="findDataById" resultType="com.yinxiang.raspberry.bean.Device" parameterType="java.lang.String">
+        select
+        <include refid="device_column"/>
+        from
+        <include refid="device_table"/>
+        where id = #{device_id}
+    </select>
+
+    <select id="findTotalNum" resultType="java.lang.Long">
+        select
+        count(*)
+        from
+        <include refid="device_table"/>
+    </select>
+
+    <select id="findOffLineNum" resultType="java.lang.Long">
+        select
+        count(*)
+        from
+        <include refid="status_table"></include>
+        where
+        status_id = 2
+    </select>
+
+    <select id="findErrNum" resultType="java.lang.Long">
+        select
+        count(*)
+        from
+        <include refid="status_table"></include>
+        where
+        status_id = 3 or status_id = 4
+    </select>
+
+    <select id="findTotalData" resultType="java.lang.Long">
+        select
+        sum(table_rows)
+        from
+        information_schema.TABLES
+        where
+        table_schema = 'intellControl'
+    </select>
+
+    <update id="updateStateById" parameterType="java.util.Map">
+        update
+        <include refid="status_table"></include>
+        set
+        temp_status = #{status_id}
+        where device_id = #{device_id}
+    </update>
+
+    <update id="updateStates">
+        update
+        <include refid="status_table"></include>
+        set
+        status_id = temp_status
+        where status_id != temp_status
+
+    </update>
+
+    <update id="resetOffLine">
+        update
+        <include refid="status_table"></include>
+        set temp_status = 2
+    </update>
+
+    <delete id="updateErrTables">
+        delete
+        from
+        <include refid="err_table"/>
+        where device_id in
+        (select device_id from device_status where status_id = 1)
+    </delete>
+
+    <insert id="insertErrTables" parameterType="java.util.Map" >
+        insert ignore into
+        <include refid="err_table"/>
+        values(#{device_id},#{status_id},#{create_time},#{description}) on duplicate key update status_id = status_id
+    </insert>
+    
+    <select id="findAllErr" resultMap="ErrMap">
+        select
+        a.device_id, a.create_time, a.description, c.areaname as area_name
+        from
+        err_devices a, device b, area c
+        where a.device_id = b.id and b.area_id = c.aid
+    </select>
+
+    <select id="findErr" parameterType="java.util.Map" resultType="java.lang.Long">
+        select count(*)
+        from
+        <include refid="err_table"/>
+        where device_id = #{device_id} and status_id = #{status_id} and description = #{description}
+    </select>
+
+    <delete id="deleteErr" parameterType="java.util.Map">
+        delete
+        from
+        <include refid="err_table"></include>
+        where device_id = #{device_id} and status_id = #{status_id} and description = #{description}
+    </delete>
+</mapper>

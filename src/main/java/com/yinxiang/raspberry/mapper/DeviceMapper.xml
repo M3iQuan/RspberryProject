@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yinxiang.raspberry.mapper.DeviceMapper">
+    <resultMap id="BaseResultMap" type="com.yinxiang.raspberry.model.Device">
+        <id property="id" column="device_id"/>
+        <result property="description" column="description"/>
+        <result property="areaname" column="areaname"/>
+        <result property="create_time" column="create_time"/>
+    </resultMap>
+
+    <select id="getWrongDeviceById" resultType="com.yinxiang.raspberry.model.Device" resultMap="BaseResultMap">
+        select ed.device_id,ed.create_time,ed.description,a.areaname
+        from device_area da,area a,err_device ed
+        where ed.device_id=da.device_id AND da.areaId=a.id AND ed.device=#{device_id}
+    </select>
+
+    <select id="getDeviceByPage" resultType="com.yinxiang.raspberry.model.Device">
+        select d.id,d.latitude,d.longitude,d.description,s.name,t.type,a.areaname
+        from device d,device_status ds,status s,area a,type t
+        where d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
+        AND (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
+        or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
+        or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+
+        <if test="description!=null and description!=''">
+            AND d.description=#{description}
+        </if>
+        <if test="latitude!=null and latitude!=''">
+            AND d.latitude=#{latitude}
+        </if>
+        <if test="longitude!=null and longitude!=''">
+            AND d.longitude=#{longitude}
+        </if>
+        <if test="statusname!=null and statusname!=''">
+            AND s.name=#{statusname}
+        </if>
+        <if test="type!=null and type!=''">
+            AND t.type=#{type}
+        </if>
+
+        <if test="id!=null and id!=''">
+            AND d.id=#{id}
+        </if>
+
+        <if test="areaname!=null and areaname!=''">
+            AND areaname = #{areaname}
+        </if>
+
+        <if test="start!=null and size!=null">
+            order by d.id limit #{start},#{size}
+        </if>
+    </select>
+
+    <select id="getCountByKeywords" resultType="java.lang.Long">
+        select count(*) from device d,device_status ds,status s,type t,area a
+        where (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
+        or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
+        or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+        AND d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
+        <if test="id!=null and id!=''">
+            AND d.id=#{id}
+        </if>
+        <if test="description!=null and description!=''">
+            AND d.description=#{description}
+        </if>
+        <if test="longitude!=null and longitude!=''">
+            AND d.longitude=#{longitude}
+        </if>
+        <if test="latitude!=null and latitude!=''">
+            AND d.latitude=#{latitude}
+        </if>
+        <if test="statusname!=null and statusname!=''">
+            AND s.name=#{statusname}
+        </if>
+        <if test="areaname!=null and areaname!=''">
+            AND areaname = #{areaname}
+        </if>
+        <if test="type!=null and type!=''">
+            AND t.type=#{type}
+        </if>
+
+    </select>
+    <update id="updateDevice">
+        update device
+        <set>
+            <if test="device.id != null">
+                id = #{device.id,jdbcType=VARCHAR},
+            </if>
+            <if test="device.latitude != null">
+                latitude = #{device.latitude,jdbcType=DOUBLE},
+            </if>
+            <if test="device.description != null">
+                description = #{device.description,jdbcType=VARCHAR},
+            </if>
+            <if test="device.longitude != null">
+                longitude = #{device.longitude,jdbcType=DOUBLE} ,
+            </if>
+            <if test="device.type != null">
+                type_id = (select id from type where type=#{device.type}),
+            </if>
+            <if test="device.areaname != null">
+                area_id = (select aid from area where areaname=#{device.areaname}),
+            </if>
+            <if test="device.sensor_value != null">
+                sensor_value = #{device.sensor_value},
+            </if>
+        </set>
+        where id = #{device.id,jdbcType=VARCHAR};
+    </update>
+
+    <update id="updateDevice_status">
+        update device_status ds
+        <set>
+            <if test="device.statusname != null">
+                ds.status_id = (select id from status s where s.name = #{device.statusname}),
+            </if>
+        </set>
+        where ds.device_id = #{device.id}
+    </update>
+
+
+    <select id="getAllType" resultType="java.lang.String">
+        select t.type from type t
+    </select>
+
+    <select id="getAllArea" resultType="java.lang.String">
+        select a.areaname from area a
+    </select>
+
+    <insert id="addDevice" parameterType="com.yinxiang.raspberry.model.Device">
+        insert into device(id,latitude,longitude,type_id,area_id,sensor_value,description) values (#{device.id},#{device.latitude},#{device.longitude},(select id from type where type=#{device.type}),(select aid from area where areaname=#{device.areaname}),#{device.sensor_value},#{device.description})
+    </insert>
+    <insert id="addDevice_status">
+        insert into device_status(device_id,status_id,temp_status) values (#{device_id},(select id from status where name = #{statusname}),2)
+    </insert>
+
+
+
+</mapper>

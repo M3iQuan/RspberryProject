@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yinxiang.raspberry.mapper.SensorMapper">
+    <resultMap id="SensorMap" type="com.yinxiang.raspberry.bean.Sensor">
+        <result column="name" property="name" />
+        <result column="value" property="value" />
+        <result column="sensor_table" property="sensor_table" />
+        <result column="sensor_column" property="sensor_column" />
+        <result column="unit" property="unit"/>
+    </resultMap>
+
+    <!--传感器数据的列名-->
+    <sql id="Column">
+        name, value, sensor_table, sensor_column, unit
+    </sql>
+    <!--传感器数据的表名-->
+    <sql id="Table">
+        sensor
+    </sql>
+
+    <select id="findAllSensors" resultMap="SensorMap">
+        select
+        <include refid="Column"/>
+        from
+        <include refid="Table"/>
+    </select>
+
+    <select id="findDataByIdAndTable" resultType="java.lang.String" parameterType="java.util.Map">
+        select ${sensor_column} from ${sensor_table} where device_id = #{device_id}
+        order by create_time desc limit 1
+    </select>
+</mapper>

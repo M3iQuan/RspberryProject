@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yinxiang.raspberry.mapper.UserMapper">
+    <select id="loadUserByUsername" resultType="com.yinxiang.raspberry.model.User">
+        select * from user where username=#{username}
+    </select>
+    <select id="getUserRolesByUid" resultType="com.yinxiang.raspberry.model.Role">
+        select * from role r,user_role ur where r.id=ur.rid and ur.uid=#{id}
+    </select>
+
+    <insert id="register" parameterType="com.yinxiang.raspberry.model.User">
+        insert into user (username,password,description,editable) values (#{username},#{username},#{description},#{editable})
+    </insert>
+
+    <delete id="deleteUserByName">
+        delete from user where (user.username = #{username})
+    </delete>
+
+    <resultMap id="BaseResultMap" type="com.yinxiang.raspberry.model.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="description" property="description"/>
+        <collection property="roles" ofType="com.yinxiang.raspberry.model.Role">
+            <id property="id" column="rid"/>
+            <result property="name" column="name"/>
+            <result property="nameZh" column="nameZh"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserByPage" resultMap="BaseResultMap">
+        select u.id,username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid
+        where (username like concat('%',#{keywords},'%') OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
+        <if test="username!=null and username!=''">
+            AND username=#{username}
+        </if>
+        <if test="description!=null and description!=''">
+            AND description=#{description}
+        </if>
+        <if test="rolename!=null and rolename!=''">
+            AND nameZh=#{rolename}
+        </if>
+        <if test="start!=null and size!=null">
+            order by u.id limit #{start},#{size}
+        </if>
+
+    </select>
+
+    <select id="getCountByKeywords" resultType="java.lang.Long">
+        select count(distinct username) from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid where (username like concat('%',#{keywords},'%')
+        OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
+        <if test="username!=null and username!=''">
+            AND username=#{username}
+        </if>
+        <if test="description!=null and description!=''">
+            AND description=#{description}
+        </if>
+        <if test="rolename!=null and rolename!=''">
+            AND nameZh=#{rolename}
+        </if>
+    </select>
+
+    <update id="updateUser">
+        update user
+        <set>
+            <if test="user.username != null">
+                username = #{user.username,jdbcType=VARCHAR},
+            </if>
+            <if test="user.password != null">
+                password = #{user.password,jdbcType=VARCHAR},
+            </if>
+            <if test="user.description != null">
+                description = #{user.description,jdbcType=VARCHAR},
+            </if>
+            <if test="user.editable != null">
+                editable = #{user.editable,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where username = #{user.username,jdbcType=VARCHAR}
+    </update>
+
+
+</mapper>

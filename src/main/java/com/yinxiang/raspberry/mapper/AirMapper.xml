@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yinxiang.raspberry.mapper.AirMapper">
+    <resultMap id="AirMap" type="com.yinxiang.raspberry.bean.Air">
+        <result column="device_id" property="device_id" />
+        <result column="create_time" property="create_time" />
+        <result column="pm2_5" property="pm2_5" />
+        <result column="pm10" property="pm10" />
+    </resultMap>
+
+    <!--空气质量数据的列名-->
+    <sql id="Column">
+        device_id, create_time, pm2_5, pm10
+    </sql>
+    <!--空气质量数据的表名-->
+    <sql id="Table">
+        air_quality
+    </sql>
+
+    <!--1.获取单个设备的历史空气质量数据数目-->
+    <select id="findCountById" resultType="java.lang.Long" parameterType="java.lang.String">
+        select count(*)
+        from
+        <include refid="Table"></include>
+        where device_id = #{device_id}
+    </select>
+
+    <!--2.获取所有设备的历史空气质量数据数目-->
+    <select id="findAllCount" resultType="java.lang.Long">
+        select count(*)
+        from
+        <include refid="Table"></include>
+    </select>
+
+    <!--3.获取所有设备的最新空气质量数据数目-->
+    <select id="findAllCountLatest" resultType="java.lang.Long">
+        select count(*)
+        from
+        (select device_id from <include refid="Table"></include> group by device_id) a
+    </select>
+
+    <!--4.获取单个设备的历史空气质量数据并且可分页-->
+    <select id="findDataByIdAndPage" resultMap="AirMap" parameterType="java.util.Map">
+        select
+        <include refid="Column" />
+        from
+        <include refid="Table"></include>
+        where device_id = #{device_id} order by create_time desc
+        limit #{currentPage},#{pageSize}
+    </select>
+
+    <!--5.获取单个设备的最新空气质量数据-->
+    <select id="findLatestDataById" resultType="com.yinxiang.raspberry.bean.Air" parameterType="java.lang.String">
+        select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"></include>
+        where device_id = #{device_id}
+        order by create_time desc
+        limit 1
+    </select>
+
+    <!--6.获取所有设备的历史空气质量数据并且分页-->
+    <select id="findAllDataByPage" resultMap="AirMap" parameterType="java.util.Map">
+        select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"></include> limit #{currentPage},#{pageSize}
+    </select>
+
+    <!--7.获取所有设备的最新空气质量数据并且分页-->
+    <select id="findAllLatestDataByPage" resultMap="AirMap" parameterType="java.util.Map">
+        select a.*
+        from
+        <include refid="Table"></include>a,
+        (select device_id, max(create_time) as create_time from <include refid="Table"></include> group by device_id) b
+        where a.create_time = b.create_time and a.device_id = b.device_id
+        limit #{currentPage},#{pageSize}
+    </select>
+
+    <!--8.新增设备的空气质量数据-->
+    <insert id="saveData" parameterType="com.yinxiang.raspberry.bean.Air">
+        insert into
+        <include refid="Table"></include>
+        (<include refid="Column"></include>)
+        VALUES
+        (#{device_id},#{create_time},#{pm2_5},#{pm10})
+    </insert>
+
+    <!--9.修改设备的空气质量数据-->
+    <update id="modifyData" parameterType="com.yinxiang.raspberry.bean.Air">
+        update
+        <include refid="Table"></include>
+        set
+        <if test="create_time!=null">
+            create_time = #{create_time},
+        </if>
+        <if test="pm2_5!=null">
+            pm2_5 = #{pm2_5},
+        </if>
+        <if test="pm10!=null">
+            pm10 = #{pm10},
+        </if>
+        where
+        device_id = #{device_id} and create_time = #{create_time}
+    </update>
+
+    <!--10.删除设备的空气质量数据-->
+    <delete id="deleteData" parameterType="java.lang.String">
+        delete from
+        <include refid="Table"></include>
+        where
+        device_id = #{device_id}
+    </delete>
+</mapper>
