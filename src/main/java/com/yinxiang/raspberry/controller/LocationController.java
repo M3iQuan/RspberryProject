@@ -3,6 +3,7 @@ package com.yinxiang.raspberry.controller;
 import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.bean.DeviceInformation;
 import com.yinxiang.raspberry.bean.Location;
+import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.DeviceInformationService;
 import com.yinxiang.raspberry.service.LocationService;
 import io.swagger.annotations.*;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Api(tags = "设备位置数据接口")
@@ -40,15 +42,20 @@ public class LocationController {
 
     //2.获取所有设备GPS数据
     @ApiOperation(value = "获取所有设备GPS数据", notes = " 获取所有设备GPS数据")
-    @RequestMapping(value = "/location", method = RequestMethod.GET)
+    @RequestMapping(value = "/area/location", method = RequestMethod.GET)
     public List<Location> findAllData() {
         return locationService.findAllData();
     }
 
     @ApiOperation(value = "根据区域设备GPS数据", notes = " 根据区域设备GPS数据")
-    @RequestMapping(value = "/location/{area_name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/area/location/{area_name}", method = RequestMethod.GET)
     public List<Location> findDataByArea(@PathVariable("area_name") String area_name) {
         return locationService.findDataByArea(area_name);
+    }
+
+    @RequestMapping(value = "/getUserArea",method = RequestMethod.GET)
+    public Map<String,Object> getArea() {
+        return locationService.getUserAreaById(UserUtils.getCurrentUser().getId());
     }
     //3.新增设备GPS数据
     /*@ApiOperation(value = "新增设备GPS数据", notes = "新增设备GPS数据")

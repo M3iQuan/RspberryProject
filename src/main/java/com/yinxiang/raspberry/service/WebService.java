@@ -23,6 +23,8 @@ public class WebService {
         return userMapper.getCountByKeywords(keywords,username,description,editable);
     }
 
+
+    //好像是用来修改密码的。
     public int updateUser(User user) {
         String password = user.getPassword();
         System.out.println(user);

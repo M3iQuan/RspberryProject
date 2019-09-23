@@ -9,7 +9,6 @@ import java.util.List;
 @Mapper
 public interface UserMapper {
     User loadUserByUsername(String username);
-
     List<Role> getUserRolesByUid(Integer id);
 
     int register(User user);
@@ -27,5 +26,6 @@ public interface UserMapper {
     Long getCountByKeywords(@Param("keywords") String keywords, @Param("username") String username, @Param("description") String description,@Param("rolename") String rolename);
 
     int updateUser(@Param("user") User user);
+
 
 }

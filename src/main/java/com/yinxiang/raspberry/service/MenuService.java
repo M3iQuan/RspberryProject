@@ -22,9 +22,9 @@ public class MenuService {
     UserMapper userMapper;
 
 
-    public List<Menu> getMenusByHrId() {
-        return menuMapper.getMenusByHrId();
-    }
+//    public List<Menu> getMenusByHrId() {
+//        return menuMapper.getMenusByHrId();
+//    }
 
     public List<Menu> getAllMenu() {
         return menuMapper.getAllMenus();

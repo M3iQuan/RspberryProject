@@ -1,6 +1,7 @@
 package com.yinxiang.raspberry.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.UserService;
 import com.yinxiang.raspberry.validate.code.ValidateCodeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +44,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private ValidateCodeFilter validateCodeFilter;
 
-    @Bean
-    RoleHierarchy roleHierarchy() {
-        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
-        String hierarchy = "ROLE_dba > ROLE_admin ROLE_admin > ROLE_user";
-        roleHierarchy.setHierarchy(hierarchy);
-        return roleHierarchy;
-    }
+//    @Bean
+//    RoleHierarchy roleHierarchy() {
+//        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+//        String hierarchy = "ROLE_admin > ROLE_controller  ROLE_controller> ROLE_browser";
+//        roleHierarchy.setHierarchy(hierarchy);
+//        return roleHierarchy;
+//    }
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -63,13 +64,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override  //解决静态资源被拦截的问题，下面的忽略拦截，下面的路径不会走安全验证
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/index.html","/swagger-ui.html/**", "/static/**", "/login_p","/code/image/**","/manage","/basic/**","/device/**");//,"/users/update","/config/sysmenu","/users","/regis","/basic/**","/device");
+        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**");//,"/manage","/basic/**","/device/**");
     }
 
 
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
         http.addFilterBefore(validateCodeFilter, UsernamePasswordAuthenticationFilter.class);
         http.authorizeRequests()
                 .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
@@ -101,6 +103,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         Map<String, Object> map = new HashMap<>();
                         map.put("status", 200);
                         map.put("msg", principal);
+                        System.out.println("用户名："+ UserUtils.getCurrentUser().getUsername());
                         ObjectMapper om = new ObjectMapper();
                         out.write(om.writeValueAsString(map));
                         out.flush();
@@ -108,8 +111,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .permitAll()
-                //.successForwardUrl("/hello")  ////如果登录失败会跳转到"/hello"
-                //.failureHandler(authenticationFailureHandler)
                 .failureHandler(new AuthenticationFailureHandler() {
                         @Override
                         public void onAuthenticationFailure(HttpServletRequest req,
@@ -141,7 +142,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                             out.close();
                         }
  })
-                .permitAll()
+                //.permitAll()
                 .and()
                 .logout()
                 .logoutUrl("/logout")
@@ -165,16 +166,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .permitAll()
-//                .and()
-//                .authorizeRequests()
-//                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
-//                    @Override
-//                    public <O extends FilterSecurityInterceptor> O postProcess(O object) {
-//                        object.setSecurityMetadataSource(cfisms());
-//                        object.setAccessDecisionManager(cadm());
-//                        return object;
-//                    }
-//                })
                 .and()
                 .csrf()
                 .disable()

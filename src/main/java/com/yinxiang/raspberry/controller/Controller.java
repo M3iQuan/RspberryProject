@@ -55,12 +55,12 @@ public class Controller {
     }
 
     @RequestMapping(value = "/addRole", method = RequestMethod.POST)  //一个一个添加角色
-    public Result addRole(User user,String[] rolename) {
-        return roleService.addRole(user,rolename);
+    public Result addRole(User user,String rolename,String[] areaname) {
+        return roleService.addRole(user,rolename,areaname);
     }
 
 
-    @RequestMapping(value = "/changeDetail",method = RequestMethod.POST)
+    @RequestMapping(value = "/changeDetail",method = RequestMethod.POST)  //修改用户信息
     public Result changeDetail(User user) {
         return userService.changeDetail(user);
     }
@@ -172,5 +172,6 @@ public class Controller {
             return result;
         }
     }
+
 
 }
