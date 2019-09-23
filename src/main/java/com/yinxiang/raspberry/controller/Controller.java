@@ -173,5 +173,10 @@ public class Controller {
         }
     }
 
+    @RequestMapping(value = "AuthorityAllocation",method = RequestMethod.POST) //权限分配
+    public Result changeRole(User user,String rolename,String[] areaname) {
+        return roleService.addRole(user,rolename,areaname);
+    }
+
 
 }
