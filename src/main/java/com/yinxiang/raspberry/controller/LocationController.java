@@ -40,13 +40,13 @@ public class LocationController {
 
     //2.获取所有设备GPS数据
     @ApiOperation(value = "获取所有设备GPS数据", notes = " 获取所有设备GPS数据")
-    @RequestMapping(value = "/location", method = RequestMethod.GET)
+    @RequestMapping(value = "/area/location", method = RequestMethod.GET)
     public List<Location> findAllData() {
         return locationService.findAllData();
     }
 
     @ApiOperation(value = "根据区域设备GPS数据", notes = " 根据区域设备GPS数据")
-    @RequestMapping(value = "/location/{area_name}", method = RequestMethod.GET)
+    @RequestMapping(value = "/area/location/{area_name}", method = RequestMethod.GET)
     public List<Location> findDataByArea(@PathVariable("area_name") String area_name) {
         return locationService.findDataByArea(area_name);
     }

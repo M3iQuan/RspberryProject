@@ -22,6 +22,8 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.util.StringUtils;
 
+import java.net.ServerSocket;
+
 
 @Configuration
 @IntegrationComponentScan
@@ -46,7 +48,7 @@ public class MqttConfig {
 
     //用于接收设备发送过来的topic
     @Value("${spring.mqtt.server.topic}")
-    private String receiveTopic;
+    private String onlineTopic;
 
     @Autowired
     DeviceInformationService deviceInformationService;
@@ -110,7 +112,7 @@ public class MqttConfig {
     public MessageHandler mqttOutbound(){
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId, mqttPahoClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic(receiveTopic);
+        messageHandler.setDefaultTopic(sendTopic);
         return messageHandler;
     }
 
@@ -118,24 +120,51 @@ public class MqttConfig {
      * MQTT接收通道(用于接收消息)
      * @return MessageChannel
      */
-    @Bean(name = CHANNEL_NAME_IN)
-    public MessageChannel mqttInboundChannel(){
+    @Bean(name = "mqttInboundChannelOne")
+    public MessageChannel mqttInboundChannelOne(){
         return new DirectChannel();
     }
+
+    @Bean(name = "mqttInboundChannelTwo")
+    public MessageChannel mqttInboundChannelTwo(){
+        return new DirectChannel();
+    }
+
 
     /**
      * MQTT消息处理器(用于接收消息)
      * @return MessageHandler
      */
     @Bean
-    @ServiceActivator(inputChannel = CHANNEL_NAME_IN)
-    public MessageHandler handler() {
+    @ServiceActivator(inputChannel = "mqttInboundChannelOne")
+    public MessageHandler handlerOne() {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String[] str = StringUtils.split(message.getPayload().toString(), " ");
-                deviceInformationService.updateStates(str[0], new Integer(str[1]));
-                //System.out.println(str[0] + "update status to" + str[1]);
+                String[] deviceInformation = message.getPayload().toString().split("#");
+                System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
+                //deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
+            }
+        };
+    }
+
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelTwo")
+    public MessageHandler handlerTwo() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
+                String data = message.getPayload().toString();
+                if("device/temperature_and_humidity".equals(topic)){
+                    System.out.println(topic + " receive message " + data);
+                }else if("device/air_light/".equals(topic)){
+                    System.out.println(topic + " receive message" + data);
+                }else if("device/water".equals(topic)){
+                    System.out.println(topic + " receive message" + data);
+                }else if("device/protector".equals(topic)){
+                    System.out.println(topic + " receive message" + data);
+                }
             }
         };
     }
@@ -145,14 +174,26 @@ public class MqttConfig {
      * @return MessageProducer
      */
     @Bean
-    public MessageProducer inbound(){
-        // 可以同时订阅多个Topic
+    //判断离线在线的topic
+    public MessageProducer inboundOne(){
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId, mqttPahoClientFactory(), receiveTopic);
+                serverId+"_online", mqttPahoClientFactory(), onlineTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannel());
+        adapter.setOutputChannel(mqttInboundChannelOne());
+        return adapter;
+    }
+
+    @Bean
+    //接收数据的topic
+    public MessageProducer inboundTwo(){
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                serverId+"_device", mqttPahoClientFactory(), "device/temperature_and_humidity", "device/air_light", "device/water", "device/protector");
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelTwo());
         return adapter;
     }
 }

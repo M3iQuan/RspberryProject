@@ -93,8 +93,6 @@
         <include refid="status_table"></include>
         set
         status_id = temp_status
-        where status_id != temp_status
-
     </update>
 
     <update id="resetOffLine">
