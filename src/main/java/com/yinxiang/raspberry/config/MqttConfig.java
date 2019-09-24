@@ -1,7 +1,7 @@
 package com.yinxiang.raspberry.config;
 
-import com.yinxiang.raspberry.bean.DeviceInformation;
-import com.yinxiang.raspberry.service.DeviceInformationService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yinxiang.raspberry.service.*;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +20,9 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.util.StringUtils;
 
-import java.net.ServerSocket;
+import java.io.IOException;
+import java.util.Map;
 
 
 @Configuration
@@ -52,6 +52,15 @@ public class MqttConfig {
 
     @Autowired
     DeviceInformationService deviceInformationService;
+    @Autowired
+    TempAndHumService tempAndHumService;
+    @Autowired
+    WaterService waterService;
+    @Autowired
+    AutoReclosingPowerProtectorService autoReclosingPowerProtectorService;
+    @Autowired
+    AirLightService airLightService;
+
     /**
      * 订阅的bean名称
      */
@@ -155,15 +164,26 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
-                String data = message.getPayload().toString();
+                String jsonData = message.getPayload().toString();
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> data = null;
+                try {
+                    data = mapper.readValue(jsonData, Map.class);
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
                 if("device/temperature_and_humidity".equals(topic)){
-                    System.out.println(topic + " receive message " + data);
-                }else if("device/air_light/".equals(topic)){
-                    System.out.println(topic + " receive message" + data);
+                    tempAndHumService.saveData(data);
+                    //System.out.println(topic + " receive message " + jsonData);
+                }else if("device/air_light".equals(topic)){
+                    airLightService.saveData(data);
+                    //System.out.println(topic + " receive message" + jsonData);
                 }else if("device/water".equals(topic)){
-                    System.out.println(topic + " receive message" + data);
+                    waterService.saveData(data);
+                    //System.out.println(topic + " receive message" + jsonData);
                 }else if("device/protector".equals(topic)){
-                    System.out.println(topic + " receive message" + data);
+                    autoReclosingPowerProtectorService.saveData(data);
+                    //System.out.println(topic + " receive message" + jsonData);
                 }
             }
         };

@@ -85,7 +85,18 @@
         <include refid="status_table"></include>
         set
         temp_status = #{status_id}
-        where device_id = #{device_id}
+        where device_id = #{device_id} and temp_status != #{status_id}
+    </update>
+
+    <update id="updateOnlineBySet" parameterType="java.util.HashSet">
+        UPDATE
+        <include refid="status_table"></include>
+        set
+        temp_status = 1
+        where device_id IN 
+        <foreach item="item" index="index" collection="collection" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </update>
 
     <update id="updateStates">

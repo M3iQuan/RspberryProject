@@ -78,7 +78,7 @@
     </select>
 
     <!--8.新增设备的水浸数据-->
-    <insert id="saveData" parameterType="com.yinxiang.raspberry.bean.Water">
+    <insert id="saveData" parameterType="java.util.Map">
         insert into
         <include refid="Table"></include>
         (<include refid="Column"></include>)

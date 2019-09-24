@@ -30,7 +30,7 @@ public interface TempAndHumMapper {
     List<TempAndHum> findAllLatestDataByPage(Map<String, Object> data);
 
     //8.新增设备的温湿度数据
-    Long saveData(TempAndHum tempAndHum);
+    Long saveData(Map<String, Object> data);
 
     //9.修改设备的温湿度数据
     Long modifyData(TempAndHum tempAndHum);

@@ -62,8 +62,8 @@ public class TempAndHumService {
     }
 
     //8.新增设备的温湿度数据
-    public Long saveData(TempAndHum tempAndHum) {
-        return tempAndHumMapper.saveData(tempAndHum);
+    public Long saveData(Map<String, Object> data) {
+        return tempAndHumMapper.saveData(data);
     }
 
     //9.修改设备的温湿度数据

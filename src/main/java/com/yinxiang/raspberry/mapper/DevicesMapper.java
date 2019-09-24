@@ -4,6 +4,7 @@ import com.yinxiang.raspberry.bean.Device;
 import com.yinxiang.raspberry.bean.ErrDevices;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,8 @@ public interface DevicesMapper {
 
     //2.修改单个设备的状态，参数是device_id, status_id
     void updateStateById(Map<String, Object> data);
+
+    void updateOnlineBySet(HashSet<String> data);
 
     //3.更新所有设备状态
     void updateStates();

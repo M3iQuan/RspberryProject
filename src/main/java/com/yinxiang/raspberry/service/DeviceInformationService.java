@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,9 @@ public class DeviceInformationService {
         return totalDevices;
     }
 
-
+    public void updateOnlineBySet(HashSet<String> data){
+        deviceMapper.updateOnlineBySet(data);
+    }
 
     public void updateStatesById(String device_id, String type_id, String date_time, String device_status){
         Map<String,Object> data = new HashMap<>();

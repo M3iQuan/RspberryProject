@@ -76,11 +76,11 @@ public class TempAndHumController {
     }
 
     //8.新增设备的温湿度数据
-    @ApiOperation(value = "新增设备的温湿度数据", notes = "往数据库传入新的温湿度数据")
+    /*@ApiOperation(value = "新增设备的温湿度数据", notes = "往数据库传入新的温湿度数据")
     @RequestMapping(value = "/device/temperature_and_humidity", method = RequestMethod.POST)
     public void createData(@RequestBody @ApiParam(name = "温湿度数据", value = "传入json格式", required = true) TempAndHum tempAndHum) {
         tempAndHumService.saveData(tempAndHum);
-    }
+    }*/
 
     //9.修改设备的温湿度数据
     @ApiOperation(value = "修改设备的温湿度数据", notes = "在进行了风扇转速调整了,修改相应的数据")

@@ -17,5 +17,11 @@
         air_light
     </sql>
 
-
+    <insert id="saveData" parameterType="java.util.Map">
+        insert into
+        <include refid="Table"></include>
+        (<include refid="Column"></include>)
+        VALUES
+        (#{device_id},#{create_time},#{luminance},#{pm2_5}, #{pm10})
+    </insert>
 </mapper>

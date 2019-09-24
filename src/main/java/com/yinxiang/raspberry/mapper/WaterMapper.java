@@ -30,7 +30,7 @@ public interface WaterMapper {
     List<Water> findAllLatestDataByPage(Map<String, Object> data);
 
     //8.新增设备的水浸数据
-    Long saveData(Water water);
+    Long saveData(Map<String, Object> data);
 
     //9.修改设备的水浸数据
     Long modifyData(Water water);

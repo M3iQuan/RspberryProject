@@ -8,11 +8,12 @@
         <result column="humidity" property="humidity" />
         <result column="fan_state" property="fan_state"/>
         <result column="fan_speed" property="fan_speed"/>
+        <result column="auto_flag" property="auto_flag"/>
     </resultMap>
 
     <!--温度和湿度的列名-->
     <sql id="Column">
-        device_id, create_time, temperature, humidity, fan_state, fan_speed
+        device_id, create_time, temperature, humidity, fan_state, fan_speed, auto_flag
     </sql>
     <!--温度和湿度的表名-->
     <sql id="Table">
@@ -81,12 +82,12 @@
     </select>
 
     <!--8.新增设备的温湿度数据-->
-    <insert id="saveData" parameterType="com.yinxiang.raspberry.bean.TempAndHum">
+    <insert id="saveData" parameterType="java.util.Map">
         insert into
         <include refid="Table"></include>
         (<include refid="Column"></include>)
         VALUES
-        (#{device_id},#{create_time},#{temperature},#{humidity}, #{fan_state}, #{fan_speed})
+        (#{device_id},#{create_time},#{temperature},#{humidity}, #{fan_state}, #{fan_speed}, #{auto_flag})
     </insert>
 
     <!--9.修改设备的温湿度数据-->

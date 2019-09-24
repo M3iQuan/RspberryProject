@@ -8,4 +8,6 @@ import java.util.Map;
 public interface AirLightMapper {
 
     List<AirLight> search(Map<String, Object> data);
+
+    Long saveData(Map<String, Object> data);
 }

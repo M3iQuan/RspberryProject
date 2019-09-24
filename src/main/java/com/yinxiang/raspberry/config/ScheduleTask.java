@@ -36,13 +36,13 @@ public class ScheduleTask {
     //@Order(1)
     //@Async
     //指定时间间隔，每5分钟执行一次
-    @Scheduled(cron = "*/5 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     //添加定时任务
     public void configureTasks2(){
         mqttService.sendToMqtt("device/online_test","say hello");
         System.out.println(getCount() + " 广播状态");
         setCount(getCount()+1);
-        if(getCount() >= 2){
+        if(getCount() > 2){
             deviceInformationService.updateStates();
             System.out.println(getCount() + "更新状态表");
             setCount(0);

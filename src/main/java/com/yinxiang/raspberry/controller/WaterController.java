@@ -76,11 +76,11 @@ public class WaterController {
     }
 
     //8.新增设备的水浸数据
-    @ApiOperation(value = "新增设备的水浸数据", notes = "往数据库传入新的水浸数据")
+    /*@ApiOperation(value = "新增设备的水浸数据", notes = "往数据库传入新的水浸数据")
     @RequestMapping(value = "/device/water", method = RequestMethod.POST)
     public void createData(@RequestBody @ApiParam(name = "水浸数据", value = "传入json格式", required = true) Water water) {
         waterService.saveData(water);
-    }
+    }*/
 
     //9.修改设备的水浸数据
     @ApiOperation(value = "修改设备的水浸数据")
