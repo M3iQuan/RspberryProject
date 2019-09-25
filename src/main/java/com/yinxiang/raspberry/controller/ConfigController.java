@@ -13,8 +13,8 @@ public class ConfigController {
     @Autowired
     MenuService menuService;
 
-    @RequestMapping("/config/sysmenu")
-    public List<Menu> sysmenu() {
-        return menuService.getMenusByHrId();
-    }
+//    @RequestMapping("/config/sysmenu")
+//    public List<Menu> sysmenu() {
+//        return menuService.getMenusByHrId();
+//    }
 }

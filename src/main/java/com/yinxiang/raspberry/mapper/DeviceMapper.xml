@@ -39,15 +39,12 @@
         <if test="type!=null and type!=''">
             AND t.type=#{type}
         </if>
-
         <if test="id!=null and id!=''">
             AND d.id=#{id}
         </if>
-
         <if test="areaname!=null and areaname!=''">
             AND areaname = #{areaname}
         </if>
-
         <if test="start!=null and size!=null">
             order by d.id limit #{start},#{size}
         </if>

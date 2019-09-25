@@ -6,7 +6,6 @@
     <resultMap id="BaseResultMap1" type="com.yinxiang.raspberry.model.Menu">
         <id property="id" column="id"/>
         <result property="pattern" column="pattern"/>
-        <result property="menuname" column="menuname"/>
         <collection property="roles" ofType="com.yinxiang.raspberry.model.Role">
             <id property="id" column="rid"/>
             <result property="name" column="rname"/>
@@ -14,39 +13,39 @@
         </collection>
     </resultMap>
 
-    <resultMap id="BaseResultMap2" type="com.yinxiang.raspberry.model.Menu">
-        <id column="id" property="id" jdbcType="INTEGER"/>
-        <result column="url" property="url" jdbcType="VARCHAR"/>
-        <result column="path" property="path" jdbcType="VARCHAR"/>
-        <result column="component" property="component" javaType="java.lang.Object"/>
-        <result column="name" property="name" jdbcType="VARCHAR"/>
-        <result column="iconCls" property="iconCls" jdbcType="VARCHAR"/>
-        <result column="parentId" property="parentId" jdbcType="INTEGER"/>
+    <!--<resultMap id="BaseResultMap2" type="com.yinxiang.raspberry.model.Menu">-->
+        <!--<id column="id" property="id" jdbcType="INTEGER"/>-->
+        <!--<result column="url" property="url" jdbcType="VARCHAR"/>-->
+        <!--<result column="path" property="path" jdbcType="VARCHAR"/>-->
+        <!--<result column="component" property="component" javaType="java.lang.Object"/>-->
+        <!--<result column="name" property="name" jdbcType="VARCHAR"/>-->
+        <!--<result column="iconCls" property="iconCls" jdbcType="VARCHAR"/>-->
+        <!--<result column="parentId" property="parentId" jdbcType="INTEGER"/>-->
 
-        <collection property="roles" ofType="com.yinxiang.raspberry.model.Role">
-            <id column="rid" property="id"/>
-            <result column="rname" property="name"/>
-            <result column="rnamezh" property="nameZh"/>
-        </collection>
-        <collection property="children" ofType="com.yinxiang.raspberry.model.Menu">
-            <id column="id2" property="id"/>
-            <result column="path2" property="path" jdbcType="VARCHAR"/>
-            <result column="component2" property="component" jdbcType="VARCHAR"/>
-            <result column="name2" property="name" jdbcType="VARCHAR"/>
-            <result column="iconCls2" property="iconCls" jdbcType="VARCHAR"/>
-            <collection property="children" ofType="com.yinxiang.raspberry.model.Menu">
-                <id column="id3" property="id"/>
-                <result column="name3" property="name" jdbcType="VARCHAR"/>
-            </collection>
-        </collection>
-    </resultMap>
+        <!--<collection property="roles" ofType="com.yinxiang.raspberry.model.Role">-->
+            <!--<id column="rid" property="id"/>-->
+            <!--<result column="rname" property="name"/>-->
+            <!--<result column="rnamezh" property="nameZh"/>-->
+        <!--</collection>-->
+        <!--<collection property="children" ofType="com.yinxiang.raspberry.model.Menu">-->
+            <!--<id column="id2" property="id"/>-->
+            <!--<result column="path2" property="path" jdbcType="VARCHAR"/>-->
+            <!--<result column="component2" property="component" jdbcType="VARCHAR"/>-->
+            <!--<result column="name2" property="name" jdbcType="VARCHAR"/>-->
+            <!--<result column="iconCls2" property="iconCls" jdbcType="VARCHAR"/>-->
+            <!--<collection property="children" ofType="com.yinxiang.raspberry.model.Menu">-->
+                <!--<id column="id3" property="id"/>-->
+                <!--<result column="name3" property="name" jdbcType="VARCHAR"/>-->
+            <!--</collection>-->
+        <!--</collection>-->
+    <!--</resultMap>-->
     <select id="getAllMenus" resultMap="BaseResultMap1">
         SELECT m.*,r.id AS rid,r.name AS rname,r.nameZh AS rnameZh FROM menu m LEFT JOIN menu_role mr ON m.`id`=mr.`mid` LEFT JOIN role r ON mr.`rid`=r.`id`
     </select>
 
-    <select id="getMenusByHrId" parameterType="Long" resultMap="BaseResultMap2">
-        select m1.`id`,m1.`path`,m1.`component`,m1.`iconCls`,m1.`name`,m1.`requireAuth`,m2.`component` as component2,m2.`iconCls` as iconCls2,m2.`name` as name2,m2.`path` as path2,m2.`requireAuth` as requireAuth2 from homemenu m1,homemenu m2 where m1.`id`=m2.`parentId` and m1.`id`!=14 and m2.`enabled`=true order by m1.`id`,m2.`id`
-    </select>
+    <!--<select id="getMenusByHrId" parameterType="Long" resultMap="BaseResultMap2">-->
+        <!--select m1.`id`,m1.`path`,m1.`component`,m1.`iconCls`,m1.`name`,m1.`requireAuth`,m2.`component` as component2,m2.`iconCls` as iconCls2,m2.`name` as name2,m2.`path` as path2,m2.`requireAuth` as requireAuth2 from homemenu m1,homemenu m2 where m1.`id`=m2.`parentId` and m1.`id`!=14 and m2.`enabled`=true order by m1.`id`,m2.`id`-->
+    <!--</select>-->
     <insert id="addMenuUser" parameterType="com.yinxiang.raspberry.model.Menu">
         insert into menu_role (mid,uid) values (#{mid},#{uid});
     </insert>

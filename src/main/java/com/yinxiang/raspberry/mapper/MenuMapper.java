@@ -10,7 +10,7 @@ import java.util.List;
 public interface MenuMapper {
     List<Menu> getAllMenus();
 
-    List<Menu> getMenusByHrId();//List<Menu> getMenusByHrId(Long hrId);
+    //List<Menu> getMenusByHrId();//List<Menu> getMenusByHrId(Long hrId);
 
     int addMenuUser(@Param("mid")int mid, @Param("uid")int uid);
 

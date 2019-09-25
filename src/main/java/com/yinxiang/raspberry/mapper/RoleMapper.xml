@@ -7,4 +7,7 @@
     <select id="getAllRole" resultType="com.yinxiang.raspberry.model.Role">
         select * from role ;
     </select>
+    <insert id="addUserArea">
+        insert into user_area(user_id,area_id)values (#{user_id},#{area_id})
+    </insert>
 </mapper>

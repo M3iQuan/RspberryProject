@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -32,6 +34,13 @@ public class LocationService {
 
     public List<Location> findDataByArea(String area_name){
         return locationMapper.findDataByArea(area_name);
+    }
+
+    public Map<String,Object> getUserAreaById(int id) {
+        Map<String, Object> map = new HashMap<>();
+        String areaname = locationMapper.getUserAreaByid(id);
+        map.put("areaname",areaname);
+        return map;
     }
     //3.新增设备GPS数据
     /*public Long saveData(Location location) {
