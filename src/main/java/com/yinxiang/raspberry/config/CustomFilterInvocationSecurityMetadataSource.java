@@ -32,7 +32,7 @@ public class CustomFilterInvocationSecurityMetadataSource
             }
             System.out.println("*******");
         }
-        System.out.println("requestURL  "+requestUrl);
+        //System.out.println("requestURL  "+requestUrl);
         System.out.println("---------------");
         for (Menu menu : allMenus) {
             if (antPathMatcher.match(menu.getPattern(), requestUrl)) {

@@ -58,9 +58,22 @@
         where
         a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id and b.areaname = #{area_name}
     </select>
-    <select id="getUserAreaByid" resultType="java.lang.String">
+
+    <select id="getAreaByUserId" resultMap="AreaMap" parameterType="java.lang.Integer">
             select areaname from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
     </select>
+
+    <select id="getDeviceByUserId" resultMap="LocationMap" parameterType="java.lang.Integer">
+        select
+        a.id, a.latitude, a.longitude, b.areaname as area_name, d.name as status_name
+        from
+        device a, area b, device_status c, status d
+        where
+        a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id
+        and b.areaname in
+        ( select areaname from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id})
+    </select>
+
     <select id="getAreaIdByAreaname" resultType="int">
         select aid from area where areaname = #{areaname}
     </select>

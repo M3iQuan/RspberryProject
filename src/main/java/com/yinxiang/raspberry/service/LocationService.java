@@ -3,6 +3,7 @@ package com.yinxiang.raspberry.service;
 import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.bean.Location;
 import com.yinxiang.raspberry.mapper.LocationMapper;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,25 +24,32 @@ public class LocationService {
         return  locationMapper.findDataById(device_id);
     }
 
+    //获取所有区域名，没有根据用户信息判断
     public List<Area> findAllArea() {
         return locationMapper.findAllArea();
     }
 
-    //2.获取所有设备GPS数据
+    //根据用户信息，获取用户所在的区域
+    public List<Area> getAreaByUserId(Integer id) {
+        return locationMapper.getAreaByUserId(id);
+    }
+
+    //获取所有设备GPS数据
     public List<Location> findAllData(){
         return  locationMapper.findAllData();
     }
 
-    public List<Location> findDataByArea(String area_name){
+    //根据用户信息获取所在区域的所有设备GPS数据
+    public List<Location> getDeviceByUserId(Integer id){
+        return locationMapper.getDeviceByUserId(id);
+    }
+
+    //根据区域名获取所在区域的所有设备GPS数据
+    public List<Location> findDataByArea(String area_name) {
         return locationMapper.findDataByArea(area_name);
     }
 
-    public Map<String,Object> getUserAreaById(int id) {
-        Map<String, Object> map = new HashMap<>();
-        String areaname = locationMapper.getUserAreaByid(id);
-        map.put("areaname",areaname);
-        return map;
-    }
+
     //3.新增设备GPS数据
     /*public Long saveData(Location location) {
         return locationMapper.saveData(location);

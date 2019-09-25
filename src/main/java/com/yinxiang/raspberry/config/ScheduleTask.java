@@ -40,11 +40,11 @@ public class ScheduleTask {
     //添加定时任务
     public void configureTasks2(){
         mqttService.sendToMqtt("device/online_test","say hello");
-        System.out.println(getCount() + " 广播状态");
+        //System.out.println(getCount() + " 广播状态");
         setCount(getCount()+1);
         if(getCount() > 2){
             deviceInformationService.updateStates();
-            System.out.println(getCount() + "更新状态表");
+            //System.out.println(getCount() + "更新状态表");
             setCount(0);
         }
         //向所有设备发送状态询问

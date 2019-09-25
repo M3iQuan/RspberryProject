@@ -12,14 +12,19 @@ public interface LocationMapper {
     //1.获取单个设备的GPS数据
     Location findDataById(@Param("device_id") String device_id);
 
+    //获取所有区域名，没有根据用户信息判断
     List<Area> findAllArea();
+
+    //根据用户信息，获取用户所在的区域
+    List<Area> getAreaByUserId(@Param("id") Integer id );
+
+    //根据用户信息，获取用户所在区域的所有设备信息
+    List<Location> getDeviceByUserId(@Param("id") Integer id);
 
     //2.获取所有设备的GPS数据
     List<Location> findAllData();
 
     List<Location> findDataByArea(@Param("area_name") String area_name);
-
-    String getUserAreaByid(@Param("id") Integer id );
 
     int getAreaIdByAreaname(@Param("areaname")String areaname);
 

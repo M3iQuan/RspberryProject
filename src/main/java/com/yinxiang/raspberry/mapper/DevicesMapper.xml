@@ -46,29 +46,33 @@
         where id = #{device_id}
     </select>
 
-    <select id="findTotalNum" resultType="java.lang.Long">
+    <select id="findTotalNumByUserId" resultType="java.lang.Long" parameterType="java.lang.Integer">
         select
         count(*)
         from
         <include refid="device_table"/>
+        where area_id in
+        (select area_id from user_area where user_id = #{id})
     </select>
 
-    <select id="findOffLineNum" resultType="java.lang.Long">
+    <select id="findOffLineNumByUserId" resultType="java.lang.Long" parameterType="java.lang.Integer">
         select
         count(*)
         from
         <include refid="status_table"></include>
         where
-        status_id = 2
+        status_id = 2 and device_id in
+        (select id from device where area_id in (select area_id from user_area where user_id = #{id}))
     </select>
 
-    <select id="findErrNum" resultType="java.lang.Long">
+    <select id="findErrNumByUserId" resultType="java.lang.Long" parameterType="java.lang.Integer">
         select
         count(*)
         from
         <include refid="status_table"></include>
         where
-        status_id = 3 or status_id = 4
+        status_id = 3 or status_id = 4 and device_id in
+        (select id from device where area_id in (select area_id from user_area where user_id = #{id}))
     </select>
 
     <select id="findTotalData" resultType="java.lang.Long">
@@ -126,12 +130,13 @@
         values(#{device_id},#{status_id},#{create_time},#{description}) on duplicate key update status_id = status_id
     </insert>
     
-    <select id="findAllErr" resultMap="ErrMap">
+    <select id="findErrDeviceByUserId" resultMap="ErrMap" parameterType="java.lang.Integer">
         select
         a.device_id, a.create_time, a.description, c.areaname as area_name
         from
         err_devices a, device b, area c
-        where a.device_id = b.id and b.area_id = c.aid
+        where a.device_id = b.id and b.area_id = c.aid and b.area_id in
+        (select area_id from user_area where user_id = #{id})
     </select>
 
     <select id="findErr" parameterType="java.util.Map" resultType="java.lang.Long">
@@ -147,4 +152,5 @@
         <include refid="err_table"></include>
         where device_id = #{device_id} and status_id = #{status_id} and description = #{description}
     </delete>
+
 </mapper>

@@ -102,12 +102,12 @@ public class DeviceInformationService {
         return  payload;
     }
 
-    //2.获取设备信息汇总
-    public TotalDevices findTotalDevices(){
+    //2.根据用户信息获取用户所在区域的设备信息汇总
+    public TotalDevices findTotalDevicesByUserId(Integer id){
         TotalDevices totalDevices = new TotalDevices();
-        totalDevices.setTotalNum(deviceMapper.findTotalNum());
-        totalDevices.setOffLineNum(deviceMapper.findOffLineNum());
-        totalDevices.setErrNum(deviceMapper.findErrNum());
+        totalDevices.setTotalNum(deviceMapper.findTotalNumByUserId(id));
+        totalDevices.setOffLineNum(deviceMapper.findOffLineNumByUserId(id));
+        totalDevices.setErrNum(deviceMapper.findErrNumByUserId(id));
         totalDevices.setTotalData(deviceMapper.findTotalData());
         return totalDevices;
     }
@@ -121,7 +121,7 @@ public class DeviceInformationService {
         if(device_status.charAt(0) == '0') { //设备正常
             data.put("device_id", device_id);
             data.put("status_id", new Integer(1));
-            System.out.println(device_id + "设备正常");
+            //System.out.println(device_id + "设备正常");
         }else{
             //获取所有传感器，用于判断设备含有什么传感器
             List<Sensor> sensorList = sensorMapper.findAllSensors();
@@ -129,7 +129,7 @@ public class DeviceInformationService {
             if(device_status.charAt(0) == '1'){ //设备只有传感器故障 error
                 data.put("device_id", device_id);
                 data.put("status_id", new Integer(4));
-                System.out.println(device_id + "设备有传感器故障");
+                //System.out.println(device_id + "设备有传感器故障");
                 for(int i = 1; i < device_status.length(); i++){
                     //当设备有某个传感器时
                    if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
@@ -142,7 +142,7 @@ public class DeviceInformationService {
             }else if(device_status.charAt(0) == '2'){  //设备只有数据异常 warn
                 data.put("device_id", device_id);
                 data.put("status_id", new Integer(3));
-                System.out.println(device_id + "设备有数据异常");
+                //System.out.println(device_id + "设备有数据异常");
                 for(int i = 1; i < device_status.length(); i++){
                     //当设备有某个传感器时
                     if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
@@ -155,7 +155,7 @@ public class DeviceInformationService {
             }else{  //设备既有传感器故障和数据异常
                 data.put("device_id", device_id);
                 data.put("status_id", new Integer(4));
-                System.out.println(device_id + "设备既有传感器故障又有传感器异常");
+                //System.out.println(device_id + "设备既有传感器故障又有传感器异常");
                 for(int i = 1; i < device_status.length(); i++){
                     //当设备有某个传感器时
                     if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
@@ -203,8 +203,8 @@ public class DeviceInformationService {
     }
 
     //获取故障异常表的数据
-    public List<ErrDevices> findAllErr() {
-        return deviceMapper.findAllErr();
+    public List<ErrDevices> findErrDeviceByUserId(Integer id) {
+        return deviceMapper.findErrDeviceByUserId(id);
     }
 
     public Long findErrNum(String device_id, Integer status_id, String description) {

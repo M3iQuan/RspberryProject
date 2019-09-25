@@ -17,12 +17,12 @@
     </select>
 
     <select id="getDeviceByPage" resultType="com.yinxiang.raspberry.model.Device">
-        select d.id,d.latitude,d.longitude,d.description,s.name,t.type,a.areaname
+        select d.id,d.latitude,d.longitude,d.description,s.name,t.name,a.areaname
         from device d,device_status ds,status s,area a,type t
         where d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
         AND (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
         or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
-        or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+        or d.longitude like concat('%',#{keywords},'%') or t.name like concat('%',#{keywords},'%'))
 
         <if test="description!=null and description!=''">
             AND d.description=#{description}
@@ -37,7 +37,7 @@
             AND s.name=#{statusname}
         </if>
         <if test="type!=null and type!=''">
-            AND t.type=#{type}
+            AND t.name=#{type}
         </if>
         <if test="id!=null and id!=''">
             AND d.id=#{id}
@@ -54,7 +54,7 @@
         select count(*) from device d,device_status ds,status s,type t,area a
         where (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
         or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
-        or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+        or d.longitude like concat('%',#{keywords},'%') or t.name like concat('%',#{keywords},'%'))
         AND d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
         <if test="id!=null and id!=''">
             AND d.id=#{id}
@@ -75,7 +75,7 @@
             AND areaname = #{areaname}
         </if>
         <if test="type!=null and type!=''">
-            AND t.type=#{type}
+            AND t.name=#{type}
         </if>
 
     </select>
@@ -119,7 +119,7 @@
 
 
     <select id="getAllType" resultType="java.lang.String">
-        select t.type from type t
+        select t.name from type t
     </select>
 
     <select id="getAllArea" resultType="java.lang.String">
