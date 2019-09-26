@@ -20,6 +20,9 @@ public interface TempAndHumMapper {
     //4.获取单个设备的历史温湿度数据并且可分页
     List<TempAndHum> findDataByIdAndPage(Map<String, Object> data);
 
+    //高级搜索单个设备的历史数据
+    List<TempAndHum> queryOnCondition(Map<String, Object> data);
+
     //5.获取单个设备的最新温湿度数据
     TempAndHum findLatestDataById(@Param("device_id") String device_id);
 

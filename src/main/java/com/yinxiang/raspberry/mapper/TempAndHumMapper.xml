@@ -52,6 +52,26 @@
         limit #{currentPage},#{pageSize}
     </select>
 
+    <!-- &lt;= 代表小于等于  &gt;= 代表大于等于=-->
+    <select id="queryOnCondition" resultMap="TempAndHumMap" parameterType="java.util.Map">
+        select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"/>
+        <where>
+            <if test="device_id != null"> device_id = #{device_id}</if>
+            <if test="temperature_lessEqual != null"> temperature &lt;= #{temperature_lessEqual}</if>
+            <if test="temperature_moreEqual != null"> temperature &gt;= #{temperature_moreEqual}</if>
+            <if test="humidity_lessEqual != null"> humidity &lt;= #{humidity_lessEqual}</if>
+            <if test="humidity_moreEqual != null"> humidity &gt;= #{humidity_moreEqual}</if>
+            <if test="fan_state != null"> fan_state = #{fan_state}</if>
+            <if test="fan_speed != null"> fan_speed = #{fan_speed}</if>
+            <if test="auto_flag != null"> auto_flag = #{auto_flag}</if>
+        </where>
+        order by create_time desc
+        limit #{currentPage}, #{pageSize}
+    </select>
+
     <!--5.获取单个设备的最新温湿度数据-->
     <select id="findLatestDataById" resultType="com.yinxiang.raspberry.bean.TempAndHum" parameterType="java.lang.String">
         select

@@ -3,16 +3,19 @@ package com.yinxiang.raspberry.controller;
 import com.yinxiang.raspberry.bean.TempAndHum;
 import com.yinxiang.raspberry.service.TempAndHumService;
 import io.swagger.annotations.*;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Api(tags = "温度和湿度数据接口")
 public class TempAndHumController {
     @Autowired
     TempAndHumService tempAndHumService;
+
 
     //1.获取单个设备的历史温湿度数据数目
     @ApiOperation(value = "获取单个设备的历史温湿度数据数目", notes = "根据用户id查询温湿度数据数目")
@@ -46,6 +49,12 @@ public class TempAndHumController {
     public List<TempAndHum> findDataByIdAndPage(@PathVariable("device_id") String device_id, @PathVariable(value = "pageSize") Integer pageSize, @PathVariable(value = "currentPage", required = false) Integer currentPage) {
         return tempAndHumService.findDataByIdAndPage(device_id, pageSize, currentPage);
     }
+
+    //单个设备历史数据的高级搜索
+    /*@RequestMapping(value = "/device/temperature_and_humidity/query", method = RequestMethod.POST)
+    public List<TempAndHum> Query(@RequestBody Map<String, Object> data){
+        return tempAndHumService.queryOnCondition(data);
+    }*/
 
     //5.获取单个设备的最新温湿度数据
     @ApiOperation(value = "获取单个设备的最新温湿度数据", notes = "获取单个设备的最新温湿度数据")
