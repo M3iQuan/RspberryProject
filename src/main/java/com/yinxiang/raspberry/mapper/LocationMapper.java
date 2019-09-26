@@ -19,7 +19,7 @@ public interface LocationMapper {
 
     List<Location> findDataByArea(@Param("area_name") String area_name);
 
-    String getUserAreaByid(@Param("id") Integer id );
+    List<String> getUserAreaByid(@Param("id") Integer id );
 
     int getAreaIdByAreaname(@Param("areaname")String areaname);
 

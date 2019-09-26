@@ -27,7 +27,7 @@ public class ScheduleTask {
     public void configureTasks1(){
         //重置状态表
         /*System.out.println("更新状态表");*/
-        deviceInformationService.updateStates();
+        //deviceInformationService.updateStates();
         //更新异常表
         //向所有设备发送状态询问
         mqttService.sendToMqtt("device/online","土豆土豆，我是地瓜");

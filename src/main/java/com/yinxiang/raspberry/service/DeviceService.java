@@ -16,12 +16,12 @@ public class DeviceService {
         return deviceMapper.getWrongDeviceById(device_id);
     }
 
-    public List<Device> getDeviceByPage(Integer page, Integer size, String keywords, String id,Double latitude,Double longitude,String description,String statusname,String type,String areaname) {
+    public List<Device> getDeviceByPage(Integer page, Integer size, String keywords, String id,Double latitude,Double longitude,String description,String statusname,String type,List<String> areaname) {
         int start = (page - 1) * size;
         return deviceMapper.getDeviceByPage(start, size, keywords,id,latitude,longitude,description,statusname,type,areaname);
     }
 
-    public Long getCountByKeywords(String keywords, String id,Double latitude,Double longitude,String description,String statusname,String type,String areaname) {
+    public Long getCountByKeywords(String keywords, String id,Double latitude,Double longitude,String description,String statusname,String type,List<String> areaname) {
         return deviceMapper.getCountByKeywords(keywords,id,latitude,longitude,description,statusname,type,areaname);
     }
 

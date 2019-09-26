@@ -21,9 +21,9 @@ public interface UserMapper {
     @Update("update user set password=#{newPassword} where username=#{username}")
     void ChangePassword(@Param("username")String username,@Param("newPassword")String newPassword);
 
-    List<User> getUserByPage(@Param("start") Integer start, @Param("size") Integer size, @Param("keywords") String keywords, @Param("username") String username,@Param("description") String description,@Param("rolename") String rolename);
+    List<User> getUserByPage(@Param("start") Integer start, @Param("size") Integer size, @Param("keywords") String keywords, @Param("username") String username,@Param("description") String description,@Param("rolename") String rolename,@Param("areaname") List<String> areaname);
 
-    Long getCountByKeywords(@Param("keywords") String keywords, @Param("username") String username, @Param("description") String description,@Param("rolename") String rolename);
+    Long getCountByKeywords(@Param("keywords") String keywords, @Param("username") String username, @Param("description") String description,@Param("rolename") String rolename,@Param("areaname") List<String> areaname);
 
     int updateUser(@Param("user") User user);
 

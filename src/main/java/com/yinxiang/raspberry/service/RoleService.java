@@ -43,9 +43,11 @@ public class RoleService {
             }else {
                 userRoleMapper.deleteRoleByUid(existUser.getId());
                 userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
+                userRoleMapper.deleteRoleByUid(existUser.getId());
                 for(int i=0;i<areaname.length;i++) {
                     roleMapper.addUserArea(existUser.getId(),locationMapper.getAreaIdByAreaname(areaname[i]));
                 }
+
                 //这里还差添加用户地区的表。
 
                 result.setMsg("添加成功");

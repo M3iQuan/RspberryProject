@@ -15,4 +15,7 @@ public interface UserRoleMapper {
 
     String[] getAllRole();
 
+    int deleteUserAreaByUid(@Param("uid") Integer uid);
+
+    //int addUserAreaByAreaname(@Param("uid") Integer uid,@Param("areaname") String areaname);
 }

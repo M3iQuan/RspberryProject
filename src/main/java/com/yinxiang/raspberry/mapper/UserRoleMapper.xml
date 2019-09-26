@@ -22,5 +22,11 @@
     <select id="getAllRole" resultType="java.lang.String">
         select role.nameZh from role
     </select>
+    <delete id="deleteUserAreaByUid">
+        delete from user_area ua where ua.user_id = #{uid}
+    </delete>
+    <!--<insert id="addUserAreaByAreaname">-->
+        <!--insert into user_area(user_id,area_id) values (#{uid},(select aid from area where areaname=#{areaname}))-->
+    <!--</insert>-->
 
 </mapper>

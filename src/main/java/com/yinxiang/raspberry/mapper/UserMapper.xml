@@ -31,8 +31,13 @@
     </resultMap>
 
     <select id="getUserByPage" resultMap="BaseResultMap">
-        select u.id,username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid
+        select u.id,username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
         where (username like concat('%',#{keywords},'%') OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
+        and areaname in
+        <foreach collection="areaname" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
         <if test="username!=null and username!=''">
             AND username=#{username}
         </if>
@@ -49,8 +54,14 @@
     </select>
 
     <select id="getCountByKeywords" resultType="java.lang.Long">
-        select count(distinct username) from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid where (username like concat('%',#{keywords},'%')
+        select count(distinct username) from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
+        where (username like concat('%',#{keywords},'%')
         OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
+        and areaname in
+        <foreach collection="areaname" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
         <if test="username!=null and username!=''">
             AND username=#{username}
         </if>

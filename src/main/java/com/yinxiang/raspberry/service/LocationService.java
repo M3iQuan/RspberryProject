@@ -36,9 +36,9 @@ public class LocationService {
         return locationMapper.findDataByArea(area_name);
     }
 
-    public Map<String,Object> getUserAreaById(int id) {
+    public Map<String,Object> getUserAreaById(int id) {   //好像没用了
         Map<String, Object> map = new HashMap<>();
-        String areaname = locationMapper.getUserAreaByid(id);
+        List<String> areaname = locationMapper.getUserAreaByid(id);
         map.put("areaname",areaname);
         return map;
     }

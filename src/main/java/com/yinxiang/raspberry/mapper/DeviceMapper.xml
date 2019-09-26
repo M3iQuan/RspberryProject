@@ -23,6 +23,12 @@
         AND (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
         or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
         or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+        or a.areaname like concat('%',#{keywords},'%'))
+        and areaname in
+        <foreach collection="areaname" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
 
         <if test="description!=null and description!=''">
             AND d.description=#{description}
@@ -55,7 +61,13 @@
         where (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
         or d.description like concat('%',#{keywords},'%') or d.latitude like concat('%',#{keywords},'%')
         or d.longitude like concat('%',#{keywords},'%') or t.type like concat('%',#{keywords},'%'))
+        or a.areaname like concat('%',#{keywords},'%'))
         AND d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
+        and areaname in
+        <foreach collection="areaname" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
         <if test="id!=null and id!=''">
             AND d.id=#{id}
         </if>
