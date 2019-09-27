@@ -1,48 +1,26 @@
 package com.yinxiang.raspberry.bean;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+@Component
 public class Test {
-    String table;
-
-    List<Query> queryString;
-
-    Integer pageSize;
-
-    Integer pageNumber;
+    private HashSet<String> onLineSet = new HashSet<>();
 
     public Test() {
     }
 
-    public String getTable() {
-        return table;
+    public HashSet<String> getOnLineSet() {
+        return onLineSet;
     }
 
-    public void setTable(String table) {
-        this.table = table;
+    public void setOnLineSet(HashSet<String> onLineSet) {
+        this.onLineSet = onLineSet;
     }
 
-    public List<Query> getQueryString() {
-        return queryString;
-    }
 
-    public void setQueryString(List<Query> queryString) {
-        this.queryString = queryString;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
-
-    public Integer getPageNumber() {
-        return pageNumber;
-    }
-
-    public void setPageNumber(Integer pageNumber) {
-        this.pageNumber = pageNumber;
-    }
 }

@@ -38,7 +38,8 @@ public class DeviceInformationService {
     TempAndHumService tempAndHumService;
     @Autowired
     DeviceService deviceService;
-
+    @Autowired
+    AirLightService airLightService;
 
     //1.获取设备传感器信息
     public DeviceInformation findSensorsInformationById(String device_id) {
@@ -84,13 +85,13 @@ public class DeviceInformationService {
                     payload += ",\"重合闸电压统计次数\":{ \"欠压次数\":\""+autoReclosingPowerProtector.getVlErrCnt()
                             +"\",\"过压次数\":\""+autoReclosingPowerProtector.getVhErrCnt() +"\"}";
                 }else if(sensor.getName().equals("光照强度")){
-                    Light light = lightService.findLatestDataById(device_id);
+                    AirLight light = airLightService.findLatestDataById(device_id);
                     payload += ",\"光照强度\":{\"状态\":\""+light.getLuminance()+"lux\"}";
                 }else if(sensor.getName().equals("水浸")){
                     Water water = waterService.findLatestDataById(device_id);
                     payload += ",\"水浸\":{\"状态\":\""+water.getStatus()+"\"}";
                 }else if(sensor.getName().equals("pm2.5") || sensor.getName().equals("pm10")){
-                    Air air = airService.findLatestDataById(device_id);
+                    AirLight air = airLightService.findLatestDataById(device_id);
                     payload += ",\"空气质量\":{\"pm2.5\":\""+air.getPm2_5()+"ug/m3\", \"pm10\":\""+air.getPm10()+"ug/m3\"}";
                 }else if(sensor.getName().equals("风扇")){
                     TempAndHum tempAndHum = tempAndHumService.findLatestDataById(device_id);
@@ -118,56 +119,50 @@ public class DeviceInformationService {
 
     public void updateStatesById(String device_id, String type_id, String date_time, String device_status){
         Map<String,Object> data = new HashMap<>();
-        if(device_status.charAt(0) == '0') { //设备正常
+        //获取所有传感器，用于判断设备含有什么传感器
+        List<Sensor> sensorList = sensorMapper.findAllSensors();
+        Type deviceType = typeMapper.findDataById(new Long(type_id));
+        if(device_status.charAt(0) == '1'){ //设备只有传感器故障 error
             data.put("device_id", device_id);
-            data.put("status_id", new Integer(1));
-            //System.out.println(device_id + "设备正常");
-        }else{
-            //获取所有传感器，用于判断设备含有什么传感器
-            List<Sensor> sensorList = sensorMapper.findAllSensors();
-            Type deviceType = typeMapper.findDataById(new Long(type_id));
-            if(device_status.charAt(0) == '1'){ //设备只有传感器故障 error
-                data.put("device_id", device_id);
-                data.put("status_id", new Integer(4));
-                //System.out.println(device_id + "设备有传感器故障");
-                for(int i = 1; i < device_status.length(); i++){
-                    //当设备有某个传感器时
-                   if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                       //当某个传感器故障时
-                       if(device_status.charAt(i) == '1'){
-                            insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
-                       }
-                   }
-                }
-            }else if(device_status.charAt(0) == '2'){  //设备只有数据异常 warn
-                data.put("device_id", device_id);
-                data.put("status_id", new Integer(3));
-                //System.out.println(device_id + "设备有数据异常");
-                for(int i = 1; i < device_status.length(); i++){
-                    //当设备有某个传感器时
-                    if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                        //当某个传感器故障时
-                        if(device_status.charAt(i) == '2'){
-                            insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
-                        }
+            data.put("status_id", new Integer(4));
+            //System.out.println(device_id + "设备有传感器故障");
+            for(int i = 1; i < device_status.length(); i++){
+                //当设备有某个传感器时
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
+                    //当某个传感器故障时
+                    if(device_status.charAt(i) == '1'){
+                        insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
                     }
                 }
-            }else{  //设备既有传感器故障和数据异常
-                data.put("device_id", device_id);
-                data.put("status_id", new Integer(4));
-                //System.out.println(device_id + "设备既有传感器故障又有传感器异常");
-                for(int i = 1; i < device_status.length(); i++){
-                    //当设备有某个传感器时
-                    if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                        //当某个传感器故障时
-                        if(device_status.charAt(i) == '1'){
-                            insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
-                        }
-                    }else if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                        //当某个传感器故障时
-                        if(device_status.charAt(i) == '2'){
-                            insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
-                        }
+            }
+        }else if(device_status.charAt(0) == '2'){  //设备只有数据异常 warn
+            data.put("device_id", device_id);
+            data.put("status_id", new Integer(3));
+            //System.out.println(device_id + "设备有数据异常");
+            for(int i = 1; i < device_status.length(); i++){
+                //当设备有某个传感器时
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
+                    //当某个传感器故障时
+                    if(device_status.charAt(i) == '2'){
+                        insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
+                    }
+                }
+            }
+        }else{  //设备既有传感器故障和数据异常
+            data.put("device_id", device_id);
+            data.put("status_id", new Integer(4));
+            //System.out.println(device_id + "设备既有传感器故障又有传感器异常");
+            for(int i = 1; i < device_status.length(); i++){
+                //当设备有某个传感器时
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
+                    //当某个传感器故障时
+                    if(device_status.charAt(i) == '1'){
+                        insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
+                    }
+                }else if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
+                    //当某个传感器故障时
+                    if(device_status.charAt(i) == '2'){
+                        insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
                     }
                 }
             }

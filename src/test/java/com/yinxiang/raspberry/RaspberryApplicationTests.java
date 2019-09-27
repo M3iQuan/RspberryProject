@@ -6,13 +6,16 @@ import com.yinxiang.raspberry.mapper.LocationMapper;
 import com.yinxiang.raspberry.service.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.omg.PortableServer.POAPackage.ObjectAlreadyActive;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,7 +33,12 @@ public class RaspberryApplicationTests {
 	TempAndHumService tempAndHumService;
 	@Test
 	public void contextLoads() {
-		Map<String, Object> data = new HashMap<>();
+		List<Map<String,Object>> data= tempAndHumService.getKeyWords();
+		System.out.println(data.size());
+		for (int i = 0; i < data.size(); i++) {
+			System.out.println(data.get(i));
+		}
+		/*Map<String, Object> data = new HashMap<>();
 		data.put("device_id", "yixg0000001");
 		data.put("pageSize", new Integer(10));
 		data.put("currentPage", new Integer(1));
@@ -46,7 +54,7 @@ public class RaspberryApplicationTests {
 		queryString.add(t1);
 		queryString.add(t2);
 		data.put("queryString", queryString);
-		tempAndHumService.queryOnCondition(data);
+		tempAndHumService.queryOnCondition(data);*/
 		/*HashSet<String> data = new HashSet<>();
 		data.add("yixg0000001");
 		data.add("ba10112");

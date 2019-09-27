@@ -2,6 +2,7 @@ package com.yinxiang.raspberry.service;
 
 import com.yinxiang.raspberry.bean.TempAndHum;
 import com.yinxiang.raspberry.mapper.TempAndHumMapper;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,14 +20,50 @@ public class TempAndHumService {
         return tempAndHumMapper.findCountById(device_id);
     }
 
+    public void addCondition(Map<String,Object> data){
+        if (data.get("queryString") instanceof List) {
+            List<Map<String, Object>> queryString = (ArrayList)data.get("queryString");
+            Iterator<Map<String,Object>> iterator = queryString.iterator();
+            while (iterator.hasNext()) {
+                Map<String, Object> query = iterator.next();
+                if ("temperature".equals(query.get("name"))) {
+                    if((!"".equals(query.get("value1")))){
+                        data.put("temperature_moreEqual", new Float((String)query.get("value1")));
+                    }
+                    if(!("".equals(query.get("value2")))){
+                        data.put("temperature_lessEqual",new Float((String)query.get("value2")));
+                    }
+                } else if ("humidity".equals(query.get("name"))) {
+                    if((!"".equals(query.get("value1")))){
+                        data.put("humidity_moreEqual",new Float((String)query.get("value1")));
+                    }
+                    if(!("".equals(query.get("value2")))){
+                        data.put("humidity_lessEqual", new Float((String)query.get("value2")));
+                    }
+                } else if ("fan_state".equals(query.get("name"))) {
+                    data.put("fan_state", query.get("value"));
+                } else if ("fan_speed".equals(query.get("name"))) {
+                    if((!"".equals(query.get("value")))){
+                        data.put("fan_speed", query.get("value"));
+                    }
+                } else {
+                    data.put("auto_flag", query.get("value"));
+                }
+            }
+        }
+        data.remove("queryString");
+    }
+
     //2.获取所有设备的历史温湿度数据数目
-    public Long findAllCount() {
-        return tempAndHumMapper.findAllCount();
+    public Long findAllCount(Map<String,Object> data) {
+        addCondition(data);
+        return tempAndHumMapper.findAllCount(data);
     }
 
     //3.获取所有设备的最新温湿度数据数目
-    public Long findAllCountLatest() {
-        return tempAndHumMapper.findAllCountLatest();
+    public Long findAllCountLatest(Map<String, Object> data) {
+        addCondition(data);
+        return tempAndHumMapper.findAllCountLatest(data);
     }
 
     //4.获取单个设备的历史温湿度数据并且可分页
@@ -38,39 +75,46 @@ public class TempAndHumService {
         return tempAndHumMapper.findDataByIdAndPage(data);
     }
 
-    //单个设备历史数据的高级搜索
-    public void queryOnCondition(Map<String, Object> data){
-        if (data.get("queryString") instanceof List) {
-            List<Map<String, Object>> queryString = (LinkedList)data.get("queryString");
-            Iterator<Map<String,Object>> iterator = queryString.iterator();
-            while (iterator.hasNext()) {
-                Map<String, Object> query = iterator.next();
-                if ("temperature".equals(query.get("name"))) {
-                    if ("lessEqual".equals(query.get("opt"))) {
-                        data.put("temperature_lessEqual", query.get("value"));
-                    }else{
-                        data.put("temperature_moreEqual", query.get("value"));
-                    }
-                } else if ("humidity".equals(query.get("name"))) {
-                    if ("lessEqual".equals(query.get("opt"))) {
-                        data.put("humidity_lessEqual", query.get("value"));
-                    }else{
-                        data.put("humidity_moreEqual", query.get("value"));
-                    }
-                } else if ("fan_state".equals(query.get("name"))) {
-                    data.put("fan_state", query.get("value"));
-                } else if ("fan_speed".equals(query.get("name"))) {
-                    data.put("fan_speed", query.get("value"));
-                } else {
-                    data.put("auto_flag", query.get("value"));
-                }
+    //获取温湿度表的搜索字段
+    public List<Map<String, Object>> getKeyWords(){
+        List<String> keywords = tempAndHumMapper.getKeyWords();
+        List<Map<String, Object>> queryString = new LinkedList<>();
+        for(int i = 0; i < keywords.size(); i++){
+            Map<String, Object> data = new HashMap<>();
+            if(keywords.get(i).equals("device_id")){
+                data.put("name", "设备号");
+                data.put("type", "string");
+            } else if (keywords.get(i).equals("temperature")) {
+                data.put("name", "温度");
+                data.put("type", "float");
+            } else if (keywords.get(i).equals("humidity")) {
+                data.put("name", "湿度");
+                data.put("type", "float");
+            } else if (keywords.get(i).equals("fan_speed")) {
+                data.put("name", "风速");
+                data.put("type", "float");
+            } else if (keywords.get(i).equals("fan_state")) {
+                data.put("name", "风扇状态");
+                data.put("type", "int");
+            } else if (keywords.get(i).equals("auto_flag")) {
+                data.put("name", "远程控制状态");
+                data.put("type", "int");
+            }else {
+                continue;
             }
+            queryString.add(data);
         }
-        data.remove("queryString");
-        //return tempAndHumMapper.queryOnCondition(data);
+        return queryString;
+    }
+
+    //单个设备历史数据的高级搜索
+    public List<TempAndHum> queryOnCondition(Map<String, Object> data){
+        data.put("currentPage", (((Integer)data.get("currentPage")) - 1) * (Integer)data.get("pageSize"));
+        addCondition(data);
         for (String key : data.keySet()) {
             System.out.println(key + " : " + data.get(key));
         }
+        return tempAndHumMapper.queryOnCondition(data);
     }
 
     //5.获取单个设备的最新温湿度数据
@@ -86,11 +130,13 @@ public class TempAndHumService {
         return tempAndHumMapper.findAllDataByPage(data);
     }
 
-    //7.获取所有设备的最新温湿度数据并且分页
-    public List<TempAndHum> findAllLatestDataByPage(Integer pageSize, Integer currentPage){
-        Map<String, Object> data = new HashMap<>();
-        data.put("pageSize", pageSize);
-        data.put("currentPage", (currentPage - 1) * pageSize);
+    //7.获取用户所在区域的所有设备的最新温湿度数据并且分页
+    public List<TempAndHum> findAllLatestDataByPage(Map<String, Object> data){
+        data.put("currentPage", (((Integer)data.get("currentPage")) - 1) * (Integer)data.get("pageSize"));
+        addCondition(data);
+        for (String key : data.keySet()) {
+            System.out.println(key + " : " + data.get(key));
+        }
         return tempAndHumMapper.findAllLatestDataByPage(data);
     }
 

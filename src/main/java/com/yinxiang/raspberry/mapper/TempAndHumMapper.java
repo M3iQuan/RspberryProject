@@ -12,16 +12,19 @@ public interface TempAndHumMapper {
     Long findCountById(@Param("device_id") String device_id);
 
     //2.获取所有设备的历史温湿度数据数目
-    Long findAllCount();
 
     //3.获取所有设备的最新温湿度数据数目
-    Long findAllCountLatest();
+    Long findAllCountLatest(Map<String, Object> data);
 
     //4.获取单个设备的历史温湿度数据并且可分页
     List<TempAndHum> findDataByIdAndPage(Map<String, Object> data);
 
     //高级搜索单个设备的历史数据
     List<TempAndHum> queryOnCondition(Map<String, Object> data);
+
+    Long findAllCount(Map<String, Object> data);
+
+    List<String> getKeyWords();
 
     //5.获取单个设备的最新温湿度数据
     TempAndHum findLatestDataById(@Param("device_id") String device_id);

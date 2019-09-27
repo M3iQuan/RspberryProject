@@ -29,17 +29,23 @@
     </select>
 
     <!--2.获取所有设备的历史温湿度数据数目-->
-    <select id="findAllCount" resultType="java.lang.Long">
-        select count(*)
+    <select id="findAllCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        select count(*) from
+        (select
+        <include refid="Column"></include>
         from
-        <include refid="Table"></include>
-    </select>
-
-    <!--3.获取所有设备的最新温湿度数据数目-->
-    <select id="findAllCountLatest" resultType="java.lang.Long">
-        select count(*)
-        from
-        (select device_id from <include refid="Table"></include> group by device_id) a
+        <include refid="Table"/>
+        <where>
+            <if test="device_id != null"> device_id like CONCAT('%', #{device_id}, '%')</if>
+            <if test="temperature_lessEqual != null"> and temperature &lt;= #{temperature_lessEqual}</if>
+            <if test="temperature_moreEqual != null"> and temperature &gt;= #{temperature_moreEqual}</if>
+            <if test="humidity_lessEqual != null"> and humidity &lt;= #{humidity_lessEqual}</if>
+            <if test="humidity_moreEqual != null"> and humidity &gt;= #{humidity_moreEqual}</if>
+            <if test="fan_state != null"> and fan_state = #{fan_state}</if>
+            <if test="fan_speed != null"> and fan_speed = #{fan_speed}</if>
+            <if test="auto_flag != null"> and auto_flag = #{auto_flag}</if>
+        </where>
+        ) a
     </select>
 
     <!--4.获取单个设备的历史温湿度数据并且可分页-->
@@ -52,6 +58,12 @@
         limit #{currentPage},#{pageSize}
     </select>
 
+    <select id="getKeyWords" resultType="java.lang.String">
+        select column_name
+        from information_schema.columns
+        where table_name = 'temperature_and_humidity' and table_schema = 'intellControl'
+    </select>
+
     <!-- &lt;= 代表小于等于  &gt;= 代表大于等于=-->
     <select id="queryOnCondition" resultMap="TempAndHumMap" parameterType="java.util.Map">
         select
@@ -59,14 +71,14 @@
         from
         <include refid="Table"/>
         <where>
-            <if test="device_id != null"> device_id = #{device_id}</if>
-            <if test="temperature_lessEqual != null"> temperature &lt;= #{temperature_lessEqual}</if>
-            <if test="temperature_moreEqual != null"> temperature &gt;= #{temperature_moreEqual}</if>
-            <if test="humidity_lessEqual != null"> humidity &lt;= #{humidity_lessEqual}</if>
-            <if test="humidity_moreEqual != null"> humidity &gt;= #{humidity_moreEqual}</if>
-            <if test="fan_state != null"> fan_state = #{fan_state}</if>
-            <if test="fan_speed != null"> fan_speed = #{fan_speed}</if>
-            <if test="auto_flag != null"> auto_flag = #{auto_flag}</if>
+            <if test="device_id != null"> device_id like CONCAT('%', #{device_id}, '%')</if>
+            <if test="temperature_lessEqual != null"> and temperature &lt;= #{temperature_lessEqual}</if>
+            <if test="temperature_moreEqual != null"> and temperature &gt;= #{temperature_moreEqual}</if>
+            <if test="humidity_lessEqual != null"> and humidity &lt;= #{humidity_lessEqual}</if>
+            <if test="humidity_moreEqual != null"> and humidity &gt;= #{humidity_moreEqual}</if>
+            <if test="fan_state != null"> and fan_state = #{fan_state}</if>
+            <if test="fan_speed != null"> and fan_speed = #{fan_speed}</if>
+            <if test="auto_flag != null"> and auto_flag = #{auto_flag}</if>
         </where>
         order by create_time desc
         limit #{currentPage}, #{pageSize}
@@ -92,13 +104,48 @@
     </select>
 
     <!--7.获取所有设备的最新温湿度数据并且分页-->
-    <select id="findAllLatestDataByPage" resultMap="TempAndHumMap" parameterType="java.util.Map">
+    <!--<select id="findAllLatestDataByPage" resultMap="TempAndHumMap" parameterType="java.util.Map">
         select a.*
         from
-        <include refid="Table"></include>a,
+        <include refid="Table"></include> a,
         (select device_id, max(create_time) as create_time from <include refid="Table"></include> group by device_id) b
         where a.create_time = b.create_time and a.device_id = b.device_id
         limit #{currentPage},#{pageSize}
+    </select>-->
+
+    <select id="findAllCountLatest" resultType="java.lang.Long" parameterType="java.util.Map">
+        select count(*)
+        from
+        (select a.*
+        from <include refid="Table"/> a,
+        (select device_id, max(create_time) as create_time from <include refid="Table"/> group by device_id) b, /*搜索时间最新的设备号*/
+        (select id from device where area_id in (select ua.area_id from user_area ua where ua.user_id = #{user_id}))c /*搜索在用户所管区域的设备号*/
+        where a.create_time = b.create_time and a.device_id = b.device_id and c.id = a.device_id
+        <if test="device_id != null"> and a.device_id like CONCAT('%', #{device_id}, '%')</if>
+        <if test="temperature_lessEqual != null"> and temperature &lt;= #{temperature_lessEqual}</if>
+        <if test="temperature_moreEqual != null"> and temperature &gt;= #{temperature_moreEqual}</if>
+        <if test="humidity_lessEqual != null"> and humidity &lt;= #{humidity_lessEqual}</if>
+        <if test="humidity_moreEqual != null"> and humidity &gt;= #{humidity_moreEqual}</if>
+        <if test="fan_state != null"> and fan_state = #{fan_state}</if>
+        <if test="fan_speed != null"> and fan_speed = #{fan_speed}</if>
+        <if test="auto_flag != null"> and auto_flag = #{auto_flag}</if>) f
+    </select>
+
+    <select id="findAllLatestDataByPage" resultMap="TempAndHumMap" parameterType="java.util.Map">
+        select a.*
+        from <include refid="Table"/> a,
+        (select device_id, max(create_time) as create_time from <include refid="Table"/> group by device_id) b, /*搜索时间最新的设备号*/
+        (select id from device where area_id in (select ua.area_id from user_area ua where ua.user_id = #{user_id}))c /*搜索在用户所管区域的设备号*/
+        where a.create_time = b.create_time and a.device_id = b.device_id and c.id = a.device_id
+        <if test="device_id != null"> and a.device_id like CONCAT('%', #{device_id}, '%')</if>
+        <if test="temperature_lessEqual != null"> and a.temperature &lt;= #{temperature_lessEqual}</if>
+        <if test="temperature_moreEqual != null"> and a.temperature &gt;= #{temperature_moreEqual}</if>
+        <if test="humidity_lessEqual != null"> and a.humidity &lt;= #{humidity_lessEqual}</if>
+        <if test="humidity_moreEqual != null"> and a.humidity &gt;= #{humidity_moreEqual}</if>
+        <if test="fan_state != null"> and a.fan_state = #{fan_state}</if>
+        <if test="fan_speed != null"> and a.fan_speed = #{fan_speed}</if>
+        <if test="auto_flag != null"> and a.auto_flag = #{auto_flag}</if>
+        limit #{currentPage}, #{pageSize}
     </select>
 
     <!--8.新增设备的温湿度数据-->

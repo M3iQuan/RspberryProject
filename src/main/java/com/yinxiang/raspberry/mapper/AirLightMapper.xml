@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.yinxiang.raspberry.mapper.AirLightMapper">
-    <resultMap id="AirLightMap" type="com.yinxiang.raspberry.bean.Air">
+    <resultMap id="AirLightMap" type="com.yinxiang.raspberry.bean.AirLight">
         <result column="device_id" property="device_id" />
         <result column="create_time" property="create_time" />
         <result column="luminance" property="luminance"/>
@@ -16,6 +16,74 @@
     <sql id="Table">
         air_light
     </sql>
+
+    <sql id="condition">
+        <if test="luminance_lessEqual != null"> and luminance &lt;= #{luminance_lessEqual}</if>
+        <if test="luminance_moreEqual != null"> and luminance &gt;= #{luminance_moreEqual}</if>
+        <if test="pm2_5_lessEqual != null"> and pm2_5 &lt;= #{pm2_5_lessEqual}</if>
+        <if test="pm2_5_moreEqual != null"> and pm2_5 &gt;= #{pm2_5_moreEqual}</if>
+        <if test="pm10_lessEqual != null"> and pm10 &lt;= #{pm10_lessEqual}</if>
+        <if test="pm10_moreEqual != null"> and pm10 &gt;= #{pm10_moreEqual}</if>
+    </sql>
+
+    <select id="findAllCountLatest" resultType="java.lang.Long" parameterType="java.util.Map">
+        select count(*)
+        from
+        (select a.*
+        from <include refid="Table"/> a,
+        (select device_id, max(create_time) as create_time from <include refid="Table"/> group by device_id) b, /*搜索时间最新的设备号*/
+        (select id from device where area_id in (select ua.area_id from user_area ua where ua.user_id = #{user_id}))c /*搜索在用户所管区域的设备号*/
+        where a.create_time = b.create_time and a.device_id = b.device_id and c.id = a.device_id
+        <if test="device_id != null"> and a.device_id like CONCAT('%', #{device_id}, '%')</if>
+        <include refid="condition"/> ) f
+    </select>
+
+    <select id="findAllLatestDataByPage" resultMap="AirLightMap" parameterType="java.util.Map">
+        select a.*
+        from <include refid="Table"/> a,
+        (select device_id, max(create_time) as create_time from <include refid="Table"/> group by device_id) b, /*搜索时间最新的设备号*/
+        (select id from device where area_id in (select ua.area_id from user_area ua where ua.user_id = #{user_id}))c /*搜索在用户所管区域的设备号*/
+        where a.create_time = b.create_time and a.device_id = b.device_id and c.id = a.device_id
+        <if test="device_id != null"> and a.device_id like CONCAT('%', #{device_id}, '%')</if>
+        <include refid="condition"/>
+        limit #{currentPage}, #{pageSize}
+    </select>
+
+    <select id="findLatestDataById" resultType="com.yinxiang.raspberry.bean.AirLight" parameterType="java.lang.String">
+        select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"></include>
+        where device_id = #{device_id}
+        order by create_time desc
+        limit 1
+    </select>
+
+    <select id="queryOnCondition" resultMap="AirLightMap" parameterType="java.util.Map">
+        select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"/>
+        <where>
+            <if test="device_id != null"> device_id like CONCAT('%', #{device_id}, '%')</if>
+            <include refid="condition"/>
+        </where>
+        order by create_time desc
+        limit #{currentPage}, #{pageSize}
+    </select>
+
+    <select id="findAllCount" resultType="java.lang.Long" parameterType="java.util.Map">
+        select count(*) from
+        (select
+        <include refid="Column"></include>
+        from
+        <include refid="Table"/>
+        <where>
+            <if test="device_id != null"> device_id like CONCAT('%', #{device_id}, '%')</if>
+            <include refid="condition"/>
+        </where>
+        ) a
+    </select>
 
     <insert id="saveData" parameterType="java.util.Map">
         insert into

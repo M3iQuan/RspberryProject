@@ -1,12 +1,15 @@
 package com.yinxiang.raspberry.controller;
 
 import com.yinxiang.raspberry.bean.AutoReclosingPowerProtector;
+import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.AutoReclosingPowerProtectorService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Api(tags = "重合闸数据接口")
@@ -23,18 +26,18 @@ public class AutoReclosingPowerProtectorController {
     }
 
     //2.获取所有设备的历史重合闸数据数目
-    @ApiOperation(value = "获取所有设备的历史温湿度数据数目", notes = "获取所有设备的历史温湿度数据数目")
+    /*@ApiOperation(value = "获取所有设备的历史温湿度数据数目", notes = "获取所有设备的历史温湿度数据数目")
     @RequestMapping(value = "/device/auto_reclosing_power_protector/count", method = RequestMethod.GET)
     public Long findAllCount() {
         return autoReclosingPowerProtectorService.findAllCount();
-    }
+    }*/
 
     //3.获取所有设备的最新重合闸数据数目
-    @ApiOperation(value = "获取所有设备的最新重合闸数据数目", notes = "获取所有设备的最新重合闸数据数目")
+    /*@ApiOperation(value = "获取所有设备的最新重合闸数据数目", notes = "获取所有设备的最新重合闸数据数目")
     @RequestMapping(value = "/device/auto_reclosing_power_protector/latest/count", method = RequestMethod.GET)
     public Long findAllCountLatest() {
         return autoReclosingPowerProtectorService.findAllCountLatest();
-    }
+    }*/
 
 
     //4.获取单个设备的历史重合闸数据并且可分页
@@ -68,14 +71,25 @@ public class AutoReclosingPowerProtectorController {
 
     //7.获取所有设备的最新重合闸数据并且分页
     @ApiOperation(value = "获取所有设备的最新重合闸数据并且分页", notes = "获取所有设备的最新重合闸数据")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "path", name = "pageSize", value = "页面记录数目", required = true),
+    /*@ApiImplicitParams({@ApiImplicitParam(paramType = "path", name = "pageSize", value = "页面记录数目", required = true),
             @ApiImplicitParam(paramType = "path", name = "currentPage", value = "当前页面", required = true)
-    })
-    @RequestMapping(value = "/device/auto_reclosing_power_protector/latest/{pageSize}/{currentPage}", method = RequestMethod.GET)
-    public List<AutoReclosingPowerProtector> findAllLatestDataByPage(@PathVariable(value = "pageSize") Integer pageSize, @PathVariable(value = "currentPage") Integer currentPage){
-        return autoReclosingPowerProtectorService.findAllLatestDataByPage(pageSize, currentPage);
+    })*/
+    @RequestMapping(value = "/device/auto_reclosing_power_protector/latest", method = RequestMethod.POST)
+    public Map<String,Object> findAllLatestDataByPage(@RequestBody Map<String,Object> data){
+        data.put("user_id", UserUtils.getCurrentUser().getId());
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", autoReclosingPowerProtectorService.findAllLatestDataByPage(data));
+        result.put("count", autoReclosingPowerProtectorService.findAllCountLatest(data));
+        return result;
     }
 
+    @RequestMapping(value = "/device/auto_reclosing_power_protector/query", method = RequestMethod.POST)
+    public Map<String,Object> Query(@RequestBody Map<String, Object> data){
+        Map<String, Object> result = new HashMap<>();
+        result.put("result", autoReclosingPowerProtectorService.queryOnCondition(data));
+        result.put("count", autoReclosingPowerProtectorService.findAllCount(data));
+        return result;
+    }
     //8.新增设备的重合闸数据
     /*@ApiOperation(value = "新增设备的重合闸数据", notes = "往数据库传入新的重合闸数据")
     @RequestMapping(value = "/device/auto_reclosing_power_protector", method = RequestMethod.POST)
