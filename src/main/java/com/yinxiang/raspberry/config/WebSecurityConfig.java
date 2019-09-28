@@ -120,7 +120,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         throws IOException {
                             resp.setContentType("application/json;charset=utf-8");
                             PrintWriter out = resp.getWriter();
-                            resp.setStatus(401);
+                            //resp.setStatus(401);
                             Map<String, Object> map = new HashMap<>();
                             map.put("status", 401);
                             if (e instanceof LockedException) {

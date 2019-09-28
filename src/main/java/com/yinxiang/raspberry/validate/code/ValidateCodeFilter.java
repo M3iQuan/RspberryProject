@@ -5,6 +5,7 @@ package com.yinxiang.raspberry.validate.code;
 
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Component;
 
@@ -46,14 +47,20 @@ public class ValidateCodeFilter extends GenericFilterBean {
             System.out.println("requestCaptcha:"+requestCaptcha);
             if(StringUtils.isEmpty(requestCaptcha)) {
 
-                ((HttpServletResponse) res).sendError(400);
+                //((HttpServletResponse) res).sendError(400);
+                map.put("status",400);
+                ObjectMapper om = new ObjectMapper();
+                out.write(om.writeValueAsString(map));
                 out.flush();
                 out.close();
                 throw new AuthenticationServiceException("验证码不能为空!");
             }
             if(!genCaptcha.toLowerCase().equals(requestCaptcha.toLowerCase())) {
 
-                ((HttpServletResponse) res).setStatus(400);
+                //((HttpServletResponse) res).setStatus(400);
+                map.put("status",400);
+                ObjectMapper om = new ObjectMapper();
+                out.write(om.writeValueAsString(map));
                 out.flush();
                 out.close();
 
