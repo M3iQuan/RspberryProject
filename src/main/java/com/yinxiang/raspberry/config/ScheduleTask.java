@@ -35,9 +35,9 @@ public class ScheduleTask {
     //@Order(1)
     //@Async
     //指定时间间隔，每5分钟执行一次
-    @Scheduled(cron = "*/5 * * * * ?")
+    //@Scheduled(cron = "*/5 * * * * ?")
     //添加定时任务
-    public void configureTasks2(){
+    /*public void configureTasks2(){
         mqttService.sendToMqtt("device/online_test","say hello");
         System.out.println(getCount() + " 广播状态");
         setCount(getCount()+1);
@@ -49,7 +49,7 @@ public class ScheduleTask {
         //向所有设备发送状态询问
         //mqttService.sendToMqtt("device/online_test","say hello");
     }
-
+*/
     public int getCount() {
         return count;
     }

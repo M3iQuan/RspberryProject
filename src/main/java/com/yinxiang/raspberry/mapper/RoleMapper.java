@@ -12,4 +12,6 @@ public interface RoleMapper {
         List<Role> getAllRole();
 
         void addUserArea(@Param("user_id") int user_id, @Param("area_id")int area_id);
+
+        int getRidByUserId(@Param("user_id")int user_id);
 }

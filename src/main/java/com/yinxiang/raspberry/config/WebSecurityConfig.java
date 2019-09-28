@@ -1,6 +1,7 @@
 package com.yinxiang.raspberry.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yinxiang.raspberry.model.Result;
 import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.UserService;
 import com.yinxiang.raspberry.validate.code.ValidateCodeFilter;
@@ -64,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override  //解决静态资源被拦截的问题，下面的忽略拦截，下面的路径不会走安全验证
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**","/device/**","/basic/**");//,"/manage","/basic/**","/device/**");
+        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**");//,"/manage","/basic/**","/device/**");
     }
 
 
@@ -162,7 +163,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                                                 HttpServletResponse resp,
                                                 Authentication auth)
                             throws IOException {
-                        resp.sendRedirect("/login_p");
+                        resp.setContentType("application/json;charset=utf-8");
+                        Result respBean = new Result();
+                        respBean.setStatus(203);
+                        respBean.setSuccess(true);
+                        ObjectMapper om = new ObjectMapper();
+                        PrintWriter out = resp.getWriter();
+                        out.write(om.writeValueAsString(respBean));
+                        out.flush();
+                        out.close();
                     }
                 })
                 .permitAll()

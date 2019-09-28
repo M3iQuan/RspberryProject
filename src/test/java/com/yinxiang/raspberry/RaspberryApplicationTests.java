@@ -3,6 +3,7 @@ package com.yinxiang.raspberry;
 import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.bean.AutoReclosingPowerProtector;
 import com.yinxiang.raspberry.mapper.LocationMapper;
+import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,23 +31,7 @@ public class RaspberryApplicationTests {
 	TempAndHumService tempAndHumService;
 	@Test
 	public void contextLoads() {
-		Map<String, Object> data = new HashMap<>();
-		data.put("device_id", "yixg0000001");
-		data.put("pageSize", new Integer(10));
-		data.put("currentPage", new Integer(1));
-		List<Map<String, Object>> queryString = new LinkedList<>();
-		Map<String, Object> t1 = new HashMap<>();
-		Map<String, Object> t2 = new HashMap<>();
-		t1.put("name", "temperature");
-		t1.put("opt", "lessEqual");
-		t1.put("value", new Integer(30));
-		t2.put("name", "humidity");
-		t2.put("opt", "moreEqual");
-		t2.put("value", new Integer(25));
-		queryString.add(t1);
-		queryString.add(t2);
-		data.put("queryString", queryString);
-		tempAndHumService.queryOnCondition(data);
+
 		/*HashSet<String> data = new HashSet<>();
 		data.add("yixg0000001");
 		data.add("ba10112");

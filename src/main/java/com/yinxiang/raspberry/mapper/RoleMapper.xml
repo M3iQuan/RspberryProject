@@ -10,4 +10,7 @@
     <insert id="addUserArea">
         insert into user_area(user_id,area_id)values (#{user_id},#{area_id})
     </insert>
+    <select id="getRidByUserId" resultType="int">
+        select rid from user_role where uid=#{user_id};
+    </select>
 </mapper>
