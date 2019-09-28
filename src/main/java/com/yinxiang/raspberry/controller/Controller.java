@@ -1,5 +1,6 @@
 package com.yinxiang.raspberry.controller;
 
+import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.model.*;
 import com.yinxiang.raspberry.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,22 +33,23 @@ public class Controller {
     @Autowired
     private RoleService roleService;
 
-
+    @Autowired
+    private LocationService locationService;
 
 
     @PostMapping("/regis")
-    public Result register(User user){
-        return userService.register(user);
+    public Result register(User user, String rolename, String[] areaname) {
+        return userService.register(user, rolename, areaname);
     }
 
     @PostMapping(value = "/changePassword")
-    public Result changePassword(User user,String newPassword) {
-        return userService.changePassword(user,newPassword);
+    public Result changePassword(User user, String newPassword) {
+        return userService.changePassword(user, newPassword);
     }
 
     @PostMapping(value = "/resetPassword")
     public Result resetPassword(User user) {
-        return userService.changePassword(user,user.getUsername());
+        return userService.changePassword(user, user.getUsername());
     }
 
     @PostMapping(value = "/deleteUser")
@@ -55,12 +58,12 @@ public class Controller {
     }
 
     @RequestMapping(value = "/addRole", method = RequestMethod.POST)  //一个一个添加角色
-    public Result addRole(User user,String rolename,String[] areaname) {
-        return roleService.addRole(user,rolename,areaname);
+    public Result addRole(User user, String rolename, String[] areaname) {
+        return roleService.addRole(user, rolename, areaname);
     }
 
 
-    @RequestMapping(value = "/changeDetail",method = RequestMethod.POST)  //修改用户信息
+    @RequestMapping(value = "/changeDetail", method = RequestMethod.POST)  //修改用户信息
     public Result changeDetail(User user) {
         return userService.changeDetail(user);
     }
@@ -70,19 +73,38 @@ public class Controller {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "") String keywords,
-            String username, String description,String rolename
-            ) {
+            String username, String description, String rolename
+    ) {
+        int issuper = 0;
+        if("super".equals(UserUtils.getCurrentUser().getUsername())) {
+            issuper = 1;
+        }
+        List<Area> areas = locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
+        List<String> areaname = new ArrayList();
+        for (Area area : areas
+        ) {
+            areaname.add(area.getArea_name());
+        }
         Map<String, Object> map = new HashMap<>();
         List<User> userByPage = webService.getUserByPage(page, size,
-                keywords,username,description,rolename);
-        List<Role> allRole = roleService.getAllRole();
-//        for(User value:userByPage){
-//            System.out.println(value.getUsername());
-//        }
+                keywords, username, description, rolename, areaname,issuper);
 
-        Long count = webService.getCountByKeywords(keywords,username,description,rolename);
+        List<Role> allRole = roleService.getAllRole();
+
+
+        for (User value : userByPage) { //这里是把展示的用户所属的区域存到areaname2，然后存到user发上去。
+            List<String> areaname2 = new ArrayList();
+            List<Area> areas2 = locationService.getAreaByUserId(value.getId());
+            for (Area area2 : areas2
+            ) {
+                areaname2.add(area2.getArea_name());
+            }
+            value.setAreaname(areaname2);
+        }
+
+        Long count = webService.getCountByKeywords(keywords, username, description, rolename, areaname,issuper);
         map.put("users", userByPage);
-        map.put("roles",allRole);
+        map.put("roles", allRole);   //前端用来权限分配的时候展示的
         map.put("count", count);
         return map;
     }
@@ -110,15 +132,15 @@ public class Controller {
     public Map<String, Object> getAllMenu() {
         Map<String, Object> map = new HashMap<>();
         List<Menu> menus = menuService.getAllMenu();
-        map.put("menus",menus);
+        map.put("menus", menus);
         map.put("status", 200);
         return map;
     }
 
 
     @RequestMapping(value = "/Permission", method = RequestMethod.POST)
-    public Result permission(String username,String[] menunames) {
-        return menuService.permission(username,menunames);
+    public Result permission(String username, String[] menunames) {
+        return menuService.permission(username, menunames);
     }
 
     @RequestMapping(value = "/devices", method = RequestMethod.GET)
@@ -126,16 +148,22 @@ public class Controller {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "") String keywords,
-            String id,Double latitude,Double longitude,String description,String statusname,String type,List<String> areaname
+            String id, Double latitude, Double longitude, String description, String statusname, String type, String areaname
     ) {
+        List<Area> allarea = locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
+        List<String> areanames = new ArrayList();
+        for (Area area : allarea
+        ) {
+            areanames.add(area.getArea_name());
+        }
         Map<String, Object> map = new HashMap<>();
         List<Device> deviceByPage = deviceService.getDeviceByPage(page, size,
-                keywords,id,latitude,longitude,description,statusname,type,areaname);
+                keywords, id, latitude, longitude, description, statusname, type, areaname, areanames);
         List<String> types = deviceService.getAllType();
         List<String> areas = deviceService.getAllArea();
-        Long count = deviceService.getCountByKeywords(keywords,id,latitude,longitude,description,statusname,type,areaname);
-        map.put("types",types);
-        map.put("areas",areas);
+        Long count = deviceService.getCountByKeywords(keywords, id, latitude, longitude, description, statusname, type, areaname, areanames);
+        map.put("types", types);
+        map.put("areas", areas);
         map.put("devices", deviceByPage);
         map.put("count", count);
         return map;
@@ -156,16 +184,16 @@ public class Controller {
         return result;
     }
 
-    @RequestMapping(value = "/addDevice",method = RequestMethod.POST)
+    @RequestMapping(value = "/addDevice", method = RequestMethod.POST)
     public Result addDevice(Device device) {
-        System.out.println("device:"+device.toString());
+        System.out.println("device:" + device.toString());
         Result result = new Result();
-        if(deviceService.addDevice(device) == 2) {
+        if (deviceService.addDevice(device) == 2) {
             result.setMsg("添加成功!");
             result.setSuccess(true);
             result.setStatus(200);
             return result;
-        }else {
+        } else {
             result.setMsg("添加失败!");
             result.setSuccess(false);
             result.setStatus(400);
@@ -173,13 +201,13 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "/AuthorityAllocation",method = RequestMethod.POST) //权限分配
-    public Result changeRole(User user,String rolename,String[] areaname) {
-        return roleService.addRole(user,rolename,areaname);
+    @RequestMapping(value = "/AuthorityAllocation", method = RequestMethod.POST) //权限分配
+    public Result changeRole(User user, String rolename, String[] areaname) {
+        for (int i = 0; i < areaname.length; i++) {
+            System.out.println("AuthorityAllocation的areaname" + areaname[i]);
+        }
+        return roleService.addRole(user, rolename, areaname);
     }
 
-   @RequestMapping(value = "/test", method = RequestMethod.GET)
-    public String test(){
-        return UserUtils.getCurrentUser().getUsername();
-   }
+
 }

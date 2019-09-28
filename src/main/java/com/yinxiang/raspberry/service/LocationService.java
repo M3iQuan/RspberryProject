@@ -48,12 +48,6 @@ public class LocationService {
         return locationMapper.findDataByArea(area_name);
     }
 
-    public Map<String,Object> getUserAreaById(int id) {   //好像没用了
-        Map<String, Object> map = new HashMap<>();
-        List<String> areaname = locationMapper.getUserAreaByid(id);
-        map.put("areaname",areaname);
-        return map;
-    }
 
     //3.新增设备GPS数据
     /*public Long saveData(Location location) {

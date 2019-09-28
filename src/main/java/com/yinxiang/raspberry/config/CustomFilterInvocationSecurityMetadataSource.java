@@ -25,22 +25,13 @@ public class CustomFilterInvocationSecurityMetadataSource
             throws IllegalArgumentException {
         String requestUrl = ((FilterInvocation) object).getRequestUrl();
         List<Menu> allMenus = menuMapper.getAllMenus();   //只有这里用到了getAllMenus()
-        for(Menu menu : allMenus) {
-            //System.out.println(menu.getPattern());
-            for(Role role:menu.getRoles()) {
-                //System.out.println(role.getName());
-            }
-            //System.out.println("*******");
-        }
-        //System.out.println("requestURL  "+requestUrl);
-        //System.out.println("---------------");
+
         for (Menu menu : allMenus) {
             if (antPathMatcher.match(menu.getPattern(), requestUrl)) {
                     List<Role> roles = menu.getRoles();
                     String[] roleArr = new String[roles.size()];
                     for (int i = 0; i < roleArr.length; i++) {
                         roleArr[i] = roles.get(i).getName();
-                        //System.out.println("有哪些角色:"+roles.get(i).getName());
                     }
                     return SecurityConfig.createList(roleArr);
             }

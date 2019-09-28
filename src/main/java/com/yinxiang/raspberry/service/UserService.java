@@ -12,8 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 
 
 @Service
@@ -23,6 +21,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     UserRoleMapper userRoleMapper;
+
+    @Autowired
+    RoleService roleService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -35,7 +36,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public Result register(User user) { //注册的服务
+    public Result register(User user,String rolename,String[] areaname) { //注册的服务
         Result result = new Result();
         result.setSuccess(false);
         result.setDetail(null);
@@ -44,20 +45,22 @@ public class UserService implements UserDetailsService {
             if(existUser != null){
                 result.setMsg("用户名已存在");
             }else{
-                String password = user.getPassword();  //
+                String username = user.getUsername();  //
                 System.out.println(user);
-                password = new BCryptPasswordEncoder().encode(password);  //
-                user.setPassword(password);        //这三行是密码加密
-                userMapper.register(user);
-                userRoleMapper.addRole(user.getId(),3);   //这里可能得不到新注册的用户的Uid
+                String password = new BCryptPasswordEncoder().encode(username);  //
+                user.setPassword(password);//这三行是密码加密
+                System.out.println("getpassword:"+user.getPassword());
+                userMapper.register(user);   //这是把用户信息添加到user表，但是角色和区域没有划分。
+                roleService.addRole(user,rolename,areaname);
+
                 result.setMsg("注册成功");
                 result.setStatus(200);
                 result.setSuccess(true);
-                result.setDetail(user);
+                //result.setDetail(user);
             }
         } catch (Exception e) {
+            userMapper.deleteUserByName(user.getUsername());
             result.setMsg(e.getMessage());
-            e.printStackTrace();
         }
         return result;
     }

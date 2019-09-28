@@ -11,7 +11,7 @@
     </select>
 
     <insert id="register" parameterType="com.yinxiang.raspberry.model.User">
-        insert into user (username,password,description,editable) values (#{username},#{username},#{description},#{editable})
+        insert into user (username,password,description,editable) values (#{username},#{password},#{description},#{editable})
     </insert>
 
     <delete id="deleteUserByName">
@@ -38,6 +38,9 @@
                  open="(" close=")" separator=",">
             #{areaname}
         </foreach>
+        <if test="issuper==0">
+            AND u.id in (select uid from user_role ur where ur.rid != 1)
+        </if>
         <if test="username!=null and username!=''">
             AND username=#{username}
         </if>
@@ -62,6 +65,9 @@
                  open="(" close=")" separator=",">
             #{areaname}
         </foreach>
+        <if test="issuper==0">
+            AND u.id in (select uid from user_role ur where ur.rid != 1)
+        </if>
         <if test="username!=null and username!=''">
             AND username=#{username}
         </if>

@@ -10,6 +10,7 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,8 @@ public class LocationController {
     @ApiOperation(value = "根据用户信息获取所有区域", notes = " 根据用户信息获取所有区域")
     @RequestMapping(value = "/area", method = RequestMethod.GET)
     public List<Area> getAreaByUser() {
+
+        List<Area> areas = locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
         return locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
     }
 

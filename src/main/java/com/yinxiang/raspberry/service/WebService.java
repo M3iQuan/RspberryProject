@@ -19,15 +19,13 @@ public class WebService {
     LocationMapper locationMapper;
 
 
-    public List<User> getUserByPage(Integer page, Integer size, String keywords, String username, String description,String rolename) {
+    public List<User> getUserByPage(Integer page, Integer size, String keywords, String username, String description,String rolename,List<String> areaname,int issuper) {
         int start = (page - 1) * size;
-        System.out.println("UserUtils.getCurrentUser().getId():"+UserUtils.getCurrentUser().getId());
-        System.out.println("locationMapper.getUserAreaByid(UserUtils.getCurrentUser().getId())"+locationMapper.getUserAreaByid(UserUtils.getCurrentUser().getId()));
-        return userMapper.getUserByPage(start, size, keywords,username,description,rolename,locationMapper.getUserAreaByid(UserUtils.getCurrentUser().getId()));
+        return userMapper.getUserByPage(start, size, keywords,username,description,rolename,areaname,issuper);
     }
 
-    public Long getCountByKeywords(String keywords,String username,String description,String editable) {
-        return userMapper.getCountByKeywords(keywords,username,description,editable,locationMapper.getUserAreaByid(UserUtils.getCurrentUser().getId()));
+    public Long getCountByKeywords(String keywords,String username,String description,String editable,List<String> areaname,int issuper) {
+        return userMapper.getCountByKeywords(keywords,username,description,editable,areaname,issuper);
     }
 
 

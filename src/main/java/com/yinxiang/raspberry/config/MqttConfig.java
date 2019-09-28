@@ -172,12 +172,8 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String[] deviceInformation = message.getPayload().toString().split("#");
-                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
-                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getOnLineSet().add(deviceInformation[0]);
-                }else { //设备有故障，直接修改状态
-                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
-                }
+                System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
+                deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
             }
         };
     }

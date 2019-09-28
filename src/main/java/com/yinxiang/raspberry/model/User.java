@@ -18,6 +18,7 @@ public class User implements UserDetails {
     private List<Role> roles;
     private String description;
     private String editable;
+    private List<String> areaname;
 
     @Override
     @JsonIgnore
@@ -116,6 +117,14 @@ public class User implements UserDetails {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<String> getAreaname() {
+        return areaname;
+    }
+
+    public void setAreaname(List<String> areaname) {
+        this.areaname = areaname;
     }
 
     @Override

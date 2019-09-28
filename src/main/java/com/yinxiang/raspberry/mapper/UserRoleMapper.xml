@@ -23,7 +23,13 @@
         select role.nameZh from role
     </select>
     <delete id="deleteUserAreaByUid">
-        delete from user_area ua where ua.user_id = #{uid}
+        delete from user_area where user_id = #{uid}
+        and area_id in (select aid from area a where a.areaname in
+        <foreach collection="areanames" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
+        )
     </delete>
     <!--<insert id="addUserAreaByAreaname">-->
         <!--insert into user_area(user_id,area_id) values (#{uid},(select aid from area where areaname=#{areaname}))-->
