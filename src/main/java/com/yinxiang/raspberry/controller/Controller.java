@@ -126,7 +126,7 @@ public class Controller {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "") String keywords,
-            String id,Double latitude,Double longitude,String description,String statusname,String type,String areaname
+            String id,Double latitude,Double longitude,String description,String statusname,String type,List<String> areaname
     ) {
         Map<String, Object> map = new HashMap<>();
         List<Device> deviceByPage = deviceService.getDeviceByPage(page, size,
@@ -173,10 +173,13 @@ public class Controller {
         }
     }
 
-    @RequestMapping(value = "AuthorityAllocation",method = RequestMethod.POST) //权限分配
+    @RequestMapping(value = "/AuthorityAllocation",method = RequestMethod.POST) //权限分配
     public Result changeRole(User user,String rolename,String[] areaname) {
         return roleService.addRole(user,rolename,areaname);
     }
 
-
+   @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public String test(){
+        return UserUtils.getCurrentUser().getUsername();
+   }
 }

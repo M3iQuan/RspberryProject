@@ -5,7 +5,6 @@ import com.yinxiang.raspberry.service.DeviceInformationService;
 import com.yinxiang.raspberry.service.MqttService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;

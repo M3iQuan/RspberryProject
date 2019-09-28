@@ -9,9 +9,9 @@ import java.util.List;
 @Mapper
 public interface DeviceMapper {
 
-    List<Device> getDeviceByPage(@Param("start") Integer start, @Param("size") Integer size, @Param("keywords") String keywords,@Param("id") String id,@Param("latitude") Double latitude,@Param("longitude") Double longitude,@Param("description") String description,@Param("statusname") String statusname,@Param("type") String type,@Param("areaname") String areaname);
+    List<Device> getDeviceByPage(@Param("start") Integer start, @Param("size") Integer size, @Param("keywords") String keywords,@Param("id") String id,@Param("latitude") Double latitude,@Param("longitude") Double longitude,@Param("description") String description,@Param("statusname") String statusname,@Param("type") String type,@Param("areaname") List<String> areaname);
 
-    Long getCountByKeywords(@Param("keywords") String keywords,@Param("id") String id,@Param("latitude") Double latitude,@Param("longitude") Double longitude,@Param("description") String description,@Param("statusname") String statusname,@Param("type") String type,@Param("areaname") String areaname);
+    Long getCountByKeywords(@Param("keywords") String keywords,@Param("id") String id,@Param("latitude") Double latitude,@Param("longitude") Double longitude,@Param("description") String description,@Param("statusname") String statusname,@Param("type") String type,@Param("areaname") List<String> areaname);
 
     int updateDevice(@Param("device") Device device);
     int updateDevice_status(@Param("device") Device device);
