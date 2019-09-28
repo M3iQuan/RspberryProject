@@ -16,7 +16,6 @@ public class User implements UserDetails {
     private Boolean enabled;
     private Boolean locked;
     private List<Role> roles;
-    private String role;
     private String description;
     private String editable;
 
@@ -133,11 +132,4 @@ public class User implements UserDetails {
                 '}';
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 }

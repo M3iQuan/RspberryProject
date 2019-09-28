@@ -36,15 +36,18 @@ public class LocationController {
         return locationService.findDataById(device_id);
     }*/
 
-    @ApiOperation(value = "获取所有区域", notes = " 获取所有区域")
+    //根据用户信息获取所有区域
+    @ApiOperation(value = "根据用户信息获取所有区域", notes = " 根据用户信息获取所有区域")
     @RequestMapping(value = "/area", method = RequestMethod.GET)
-    public List<Area> findAllArea(){ return locationService.findAllArea();}
+    public List<Area> getAreaByUser() {
+        return locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
+    }
 
-    //2.获取所有设备GPS数据
-    @ApiOperation(value = "获取所有设备GPS数据", notes = " 获取所有设备GPS数据")
+    //根据用户信息获取用户所在区域的设备信息
+    @ApiOperation(value = "根据用户信息获取用户所在区域的设备信息", notes = " 根据用户信息获取用户所在区域的设备信息")
     @RequestMapping(value = "/area/location", method = RequestMethod.GET)
-    public List<Location> findAllData() {
-        return locationService.findAllData();
+    public List<Location> getDeviceByUser() {
+        return locationService.getDeviceByUserId(UserUtils.getCurrentUser().getId());
     }
 
     @ApiOperation(value = "根据区域设备GPS数据", notes = " 根据区域设备GPS数据")
@@ -53,10 +56,11 @@ public class LocationController {
         return locationService.findDataByArea(area_name);
     }
 
-    @RequestMapping(value = "/getUserArea",method = RequestMethod.GET)
-    public Map<String,Object> getArea() {
+    /*@RequestMapping(value = "/getUserArea",method = RequestMethod.GET)
+    public List<Area> getArea() {
         return locationService.getUserAreaById(UserUtils.getCurrentUser().getId());
-    }
+    }*/
+
     //3.新增设备GPS数据
     /*@ApiOperation(value = "新增设备GPS数据", notes = "新增设备GPS数据")
     @RequestMapping(value = "/location", method = RequestMethod.POST)

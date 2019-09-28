@@ -30,7 +30,7 @@ public interface AutoReclosingPowerProtectorMapper {
     List<AutoReclosingPowerProtector> findAllLatestDataByPage(Map<String, Object> data);
 
     //8.新增设备的重合闸数据
-    Long saveData(AutoReclosingPowerProtector autoReclosingPowerProtector);
+    Long saveData(Map<String, Object> data);
 
     //9.修改设备的重合闸数据
     Long modifyData(AutoReclosingPowerProtector autoReclosingPowerProtector);

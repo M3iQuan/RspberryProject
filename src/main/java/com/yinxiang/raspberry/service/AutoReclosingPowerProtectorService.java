@@ -63,8 +63,8 @@ public class AutoReclosingPowerProtectorService {
     }
 
     //8.新增设备的重合闸数据
-    public Long saveData(AutoReclosingPowerProtector autoReclosingPowerProtector) {
-        return autoReclosingPowerProtectorMapper.saveData(autoReclosingPowerProtector);
+    public Long saveData(Map<String, Object> data) {
+        return autoReclosingPowerProtectorMapper.saveData(data);
     }
 
     //9.修改设备的重合闸数据

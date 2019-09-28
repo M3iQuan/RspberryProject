@@ -1,6 +1,7 @@
 package com.yinxiang.raspberry.controller;
 
 import com.yinxiang.raspberry.bean.*;
+import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.DeviceInformationService;
 import com.yinxiang.raspberry.service.LocationService;
 import com.yinxiang.raspberry.service.MqttService;
@@ -22,10 +23,10 @@ public class DeviceController {
     @Autowired
     MqttService mqttService;
 
-    //1.获取设备信息汇总
+    //1.根据用户信息获取用户所在区域设备信息汇总
     @RequestMapping(value = "/totalInformation", method = RequestMethod.GET)
     public TotalDevices findTotalDevices(){
-        return deviceInformationService.findTotalDevices();
+        return deviceInformationService.findTotalDevicesByUserId(UserUtils.getCurrentUser().getId());
     }
 
     //2.获取单个设备传感器信息
@@ -49,7 +50,7 @@ public class DeviceController {
     //4.获取设备故障表数据
     @RequestMapping(value = "/ErrTables", method = RequestMethod.GET)
     public List<ErrDevices> findAllErr(){
-        return deviceInformationService.findAllErr();
+        return deviceInformationService.findErrDeviceByUserId(UserUtils.getCurrentUser().getId());
     }
 
     @RequestMapping(value = "/mqtt/{topic}/{data}", method = RequestMethod.GET)

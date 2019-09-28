@@ -77,11 +77,11 @@ public class AutoReclosingPowerProtectorController {
     }
 
     //8.新增设备的重合闸数据
-    @ApiOperation(value = "新增设备的重合闸数据", notes = "往数据库传入新的重合闸数据")
+    /*@ApiOperation(value = "新增设备的重合闸数据", notes = "往数据库传入新的重合闸数据")
     @RequestMapping(value = "/device/auto_reclosing_power_protector", method = RequestMethod.POST)
     public void saveData(@RequestBody @ApiParam(name = "重合闸数据", value = "传入json格式", required = true) AutoReclosingPowerProtector autoReclosingPowerProtector) {
         autoReclosingPowerProtectorService.saveData(autoReclosingPowerProtector);
-    }
+    }*/
 
     //9.修改设备的重合闸数据
     @ApiOperation(value = "修改设备的重合闸数据", notes = "修改设备的重合闸数据")

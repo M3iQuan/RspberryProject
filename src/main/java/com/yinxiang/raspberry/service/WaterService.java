@@ -72,9 +72,9 @@ public class WaterService {
     }
 
     //8.新增设备的水浸数据
-    public Long saveData(Water water) {
+   /* public Long saveData(Water water) {
         if("报警".equals(water.getStatus())){
-            deviceInformationService.updateStates(water.getDevice_id(),3);
+            deviceInformationService.updateStates(water.getDevice_id(),new Integer(3));
             Long errNum = deviceInformationService.findErrNum(water.getDevice_id(), 3, "水浸状态异常");
             if(errNum == 0){
                 deviceInformationService.insertErr(water.getDevice_id(),3,water.getCreate_time(),"水浸状态异常");
@@ -98,6 +98,9 @@ public class WaterService {
             }
         }
         return waterMapper.saveData(water);
+    }*/
+    public Long saveData(Map<String, Object> data) {
+        return waterMapper.saveData(data);
     }
 
     //9.修改设备的水浸数据

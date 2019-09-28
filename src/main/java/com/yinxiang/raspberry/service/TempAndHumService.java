@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -40,6 +38,41 @@ public class TempAndHumService {
         return tempAndHumMapper.findDataByIdAndPage(data);
     }
 
+    //单个设备历史数据的高级搜索
+    public void queryOnCondition(Map<String, Object> data){
+        if (data.get("queryString") instanceof List) {
+            List<Map<String, Object>> queryString = (LinkedList)data.get("queryString");
+            Iterator<Map<String,Object>> iterator = queryString.iterator();
+            while (iterator.hasNext()) {
+                Map<String, Object> query = iterator.next();
+                if ("temperature".equals(query.get("name"))) {
+                    if ("lessEqual".equals(query.get("opt"))) {
+                        data.put("temperature_lessEqual", query.get("value"));
+                    }else{
+                        data.put("temperature_moreEqual", query.get("value"));
+                    }
+                } else if ("humidity".equals(query.get("name"))) {
+                    if ("lessEqual".equals(query.get("opt"))) {
+                        data.put("humidity_lessEqual", query.get("value"));
+                    }else{
+                        data.put("humidity_moreEqual", query.get("value"));
+                    }
+                } else if ("fan_state".equals(query.get("name"))) {
+                    data.put("fan_state", query.get("value"));
+                } else if ("fan_speed".equals(query.get("name"))) {
+                    data.put("fan_speed", query.get("value"));
+                } else {
+                    data.put("auto_flag", query.get("value"));
+                }
+            }
+        }
+        data.remove("queryString");
+        //return tempAndHumMapper.queryOnCondition(data);
+        for (String key : data.keySet()) {
+            System.out.println(key + " : " + data.get(key));
+        }
+    }
+
     //5.获取单个设备的最新温湿度数据
     public TempAndHum findLatestDataById(String device_id){
         return tempAndHumMapper.findLatestDataById(device_id);
@@ -62,8 +95,8 @@ public class TempAndHumService {
     }
 
     //8.新增设备的温湿度数据
-    public Long saveData(TempAndHum tempAndHum) {
-        return tempAndHumMapper.saveData(tempAndHum);
+    public Long saveData(Map<String, Object> data) {
+        return tempAndHumMapper.saveData(data);
     }
 
     //9.修改设备的温湿度数据

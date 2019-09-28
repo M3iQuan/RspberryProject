@@ -28,6 +28,8 @@ public class TempAndHum {
      */
     private Long fan_speed;
 
+    private Long auto_flag;
+
     public TempAndHum() {
     }
 
@@ -77,5 +79,13 @@ public class TempAndHum {
 
     public void setFan_state(Long fan_state) {
         this.fan_state = fan_state;
+    }
+
+    public Long getAuto_flag() {
+        return auto_flag;
+    }
+
+    public void setAuto_flag(Long auto_flag) {
+        this.auto_flag = auto_flag;
     }
 }
