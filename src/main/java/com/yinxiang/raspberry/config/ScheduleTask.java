@@ -20,7 +20,6 @@ import java.util.Set;
 @EnableScheduling
 public class ScheduleTask {
     private int count = 0;
-    private Set<String> online = new HashSet<>();
     @Autowired
     DeviceInformationService deviceInformationService;
     @Autowired
@@ -52,14 +51,13 @@ public class ScheduleTask {
         if(getCount() >= 2) {
             if(test.getOnLineSet().size() != 0) {
                 deviceInformationService.updateOnlineBySet(test.getOnLineSet());
-            }test.getOnLineSet().clear();
+            }
+            test.getOnLineSet().clear();
             System.out.println(test.getOnLineSet().size());
             deviceInformationService.updateStates();
             System.out.println(getCount() + "更新状态表");
             setCount(0);
         }
-        //向所有设备发送状态询问
-        //mqttService.sendToMqtt("device/online_test","say hello");
     }
 
     public int getCount() {

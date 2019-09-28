@@ -177,7 +177,6 @@ public class MqttConfig {
                     test.getOnLineSet().add(deviceInformation[0]);
                 }else { //设备有故障，直接修改状态
                     deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
-
                 }
             }
         };
@@ -272,7 +271,7 @@ public class MqttConfig {
      */
     @Bean
     //判断离线在线的topic
-    public MessageProducer inboundOne(){
+    public MessageProducer inboundOnLine(){
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
                 serverId+"_online", mqttPahoClientFactory(), onlineTopic);
         adapter.setCompletionTimeout(5000);

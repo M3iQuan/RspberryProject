@@ -20,6 +20,7 @@ public class AirLightController {
     @Autowired
     AirLightService airLightService;
 
+    //根据用户所在的区域，获取该区域内所有设备的信息，并且实现高级搜索以及分页
     @RequestMapping(value = "/device/airLight/latest", method = RequestMethod.POST)
     public Map<String,Object> findAllLatestDataByPage(@RequestBody  Map<String, Object> data) {
         data.put("user_id", UserUtils.getCurrentUser().getId());
@@ -29,6 +30,7 @@ public class AirLightController {
         return result;
     }
 
+    //根据设备号进行单设备历史数据的高级搜索，并且分页
     @RequestMapping(value = "/device/airLight/query", method = RequestMethod.POST)
     public Map<String,Object> Query(@RequestBody Map<String, Object> data){
         Map<String, Object> result = new HashMap<>();

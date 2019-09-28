@@ -66,7 +66,7 @@
     <select id="findCountById" resultType="java.lang.Long" parameterType="java.lang.String">
         select count(*)
         from
-        <include refid="Table"></include>
+        <include refid="Table"/>
         where device_id = #{device_id}
     </select>
 
@@ -79,9 +79,9 @@
     <!--4.获取单个设备的历史重合闸数据并且可分页-->
     <select id="findDataByIdAndPage" resultMap="AutoReclosingPowerProtectorMap" parameterType="java.util.Map">
         select
-        <include refid="Column" />
+        <include refid="Column"/>
         from
-        <include refid="Table"></include>
+        <include refid="Table"/>
         where device_id = #{device_id}
         order by create_time desc
         limit #{currentPage},#{pageSize}
@@ -90,9 +90,9 @@
     <!--5.获取单个设备的最新重合闸数据-->
     <select id="findLatestDataById" resultType="com.yinxiang.raspberry.bean.AutoReclosingPowerProtector" parameterType="java.lang.String">
         select
-        <include refid="Column"></include>
+        <include refid="Column"/>
         from
-        <include refid="Table"></include>
+        <include refid="Table"/>
         where device_id = #{device_id}
         order by create_time desc
         limit 1
@@ -101,9 +101,9 @@
     <!--6.获取所有设备的历史重合闸数据并且分页-->
     <select id="findAllDataByPage" resultMap="AutoReclosingPowerProtectorMap" parameterType="java.util.Map">
         select
-        <include refid="Column"></include>
+        <include refid="Column"/>
         from
-        <include refid="Table"></include>
+        <include refid="Table"/>
         limit #{currentPage},#{pageSize}
     </select>
 
@@ -133,7 +133,7 @@
 
     <select id="queryOnCondition" resultMap="AutoReclosingPowerProtectorMap" parameterType="java.util.Map">
         select
-        <include refid="Column"></include>
+        <include refid="Column"/>
         from
         <include refid="Table"/>
         <where>
@@ -146,7 +146,7 @@
     <select id="findAllCount" resultType="java.lang.Long" parameterType="java.util.Map">
         select count(*) from
         (select
-        <include refid="Column"></include>
+        <include refid="Column"/>
         from
         <include refid="Table"/>
         <where>
@@ -159,8 +159,8 @@
     <!--8.新增设备的重合闸数据-->
     <insert id="saveData" parameterType="java.util.Map">
         insert into
-        <include refid="Table"></include>
-        (<include refid="Column"></include>)
+        <include refid="Table"/>
+        (<include refid="Column"/>)
         VALUES
         (#{device_id},#{create_time},#{Sta_H},#{Sta_L},#{U},#{I},#{Iz},#{Ie},#{Uov},#{Ulv},#{Izset},#{CurErrCnt},#{LKErrCnt},#{VlErrCnt},#{VhErrCnt},#{VOffCnt},#{Addr},#{VON_OFF})
     </insert>
@@ -168,7 +168,7 @@
     <!--9.修改设备的重合闸数据-->
     <update id="modifyData" parameterType="com.yinxiang.raspberry.bean.AutoReclosingPowerProtector">
         update
-        <include refid="Table"></include>
+        <include refid="Table"/>
         set
         <if test="create_time!=null">create_time = #{create_time},</if>
         <if test="Sta_H!=null">sta_H = #{Sta_H},</if>
@@ -194,7 +194,7 @@
     <!--10.删除设备的重合闸数据-->
     <delete id="deleteData" parameterType="java.lang.String">
         delete from
-        <include refid="Table"></include>
+        <include refid="Table"/>
         where
         device_id = #{device_id}
     </delete>

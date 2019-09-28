@@ -17,10 +17,12 @@ public class AirLightService {
     @Autowired
     AirLightMapper airLightMapper;
 
+    //1.插入数据
     public Long saveData(Map<String, Object> data) {
         return airLightMapper.saveData(data);
     }
 
+    //2.对搜索条件进行判断
     public void addCondition(Map<String, Object>data){
         if (data.get("queryString") instanceof List) {
             List<Map<String, Object>> queryString = (ArrayList)data.get("queryString");
@@ -54,20 +56,19 @@ public class AirLightService {
         data.remove("queryString");
     }
 
+    //3.计算单设备的历史数据进行高级搜索后的个数
     public Long findAllCount(Map<String,Object> data) {
         addCondition(data);
         return airLightMapper.findAllCount(data);
     }
 
+    //4.计算对用户所在区域的所有设备最新数据进行高级搜索后的个数
     public Long findAllCountLatest(Map<String, Object> data) {
         addCondition(data);
         return airLightMapper.findAllCountLatest(data);
     }
 
-    public AirLight findLatestDataById(String device_id) {
-        return airLightMapper.findLatestDataById(device_id);
-    }
-
+    //5.对用户所在区域的所有设备的最新数据进行高级搜索
     public List<AirLight> findAllLatestDataByPage(Map<String, Object> data){
         data.put("currentPage", (((Integer)data.get("currentPage")) - 1) * (Integer)data.get("pageSize"));
         addCondition(data);
@@ -77,6 +78,7 @@ public class AirLightService {
         return airLightMapper.findAllLatestDataByPage(data);
     }
 
+    //6.对单设备的历史数据进行高级搜索
     public List<AirLight> queryOnCondition(Map<String, Object> data){
         data.put("currentPage", (((Integer)data.get("currentPage")) - 1) * (Integer)data.get("pageSize"));
         addCondition(data);
@@ -85,5 +87,12 @@ public class AirLightService {
         }
         return airLightMapper.queryOnCondition(data);
     }
+
+    //7.按设备号搜索某台设备的最新数据
+    public AirLight findLatestDataById(String device_id) {
+        return airLightMapper.findLatestDataById(device_id);
+    }
+
+
 
 }
