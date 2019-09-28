@@ -1,6 +1,7 @@
 package com.yinxiang.raspberry.service;
 
 
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.yinxiang.raspberry.mapper.UserMapper;
 import com.yinxiang.raspberry.mapper.UserRoleMapper;
 import com.yinxiang.raspberry.model.Result;
@@ -49,9 +50,11 @@ public class UserService implements UserDetailsService {
                 System.out.println(user);
                 String password = new BCryptPasswordEncoder().encode(username);  //
                 user.setPassword(password);//这三行是密码加密
-                System.out.println("getpassword:"+user.getPassword());
+
                 userMapper.register(user);   //这是把用户信息添加到user表，但是角色和区域没有划分。
-                roleService.addRole(user,rolename,areaname);
+                if(!roleService.addRole(user,rolename,areaname).isSuccess()) {
+                    userMapper.deleteUserByName(user.getUsername());
+                }
 
                 result.setMsg("注册成功");
                 result.setStatus(200);
@@ -59,8 +62,8 @@ public class UserService implements UserDetailsService {
                 //result.setDetail(user);
             }
         } catch (Exception e) {
-            userMapper.deleteUserByName(user.getUsername());
             result.setMsg(e.getMessage());
+            e.getMessage();
         }
         return result;
     }

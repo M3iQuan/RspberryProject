@@ -31,7 +31,37 @@
     </resultMap>
 
     <select id="getUserByPage" resultMap="BaseResultMap">
-        select u.id,username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
+        select distinct * from (select u.id,username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on
+        r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
+        where (username like concat('%',#{keywords},'%') OR description like concat('%',#{keywords},'%') OR nameZh like
+        concat('%',#{keywords},'%'))
+        and areaname in
+        <foreach collection="areaname" item="areaname" index="index"
+                 open="(" close=")" separator=",">
+            #{areaname}
+        </foreach>
+        <if test="issuper==0">
+            AND u.id in (select uid from user_role ur where ur.rid != 1)
+        </if>
+        <if test="username!=null and username!=''">
+            AND username=#{username}
+        </if>
+        <if test="description!=null and description!=''">
+            AND description=#{description}
+        </if>
+        <if test="rolename!=null and rolename!=''">
+            AND nameZh=#{rolename}
+        </if>
+        order by u.id) f
+        <if test="start!=null and size!=null">
+        limit #{start},#{size}
+        </if>
+
+    </select>
+
+    <select id="getCountByKeywords" resultType="java.lang.Long">
+        select count(distinct username) from (
+        select u.id, username,description,nameZh from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
         where (username like concat('%',#{keywords},'%') OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
         and areaname in
         <foreach collection="areaname" item="areaname" index="index"
@@ -50,13 +80,10 @@
         <if test="rolename!=null and rolename!=''">
             AND nameZh=#{rolename}
         </if>
-        <if test="start!=null and size!=null">
-            order by u.id limit #{start},#{size}
-        </if>
-
+        order by u.id) f
     </select>
 
-    <select id="getCountByKeywords" resultType="java.lang.Long">
+    <!--<select id="getCountByKeywords" resultType="java.lang.Long">
         select count(distinct username) from user u left join user_role ur on u.id = ur.uid left join role r on r.id = ur.rid left join user_area ua on ua.user_id=u.id left join area a on ua.area_id=a.aid
         where (username like concat('%',#{keywords},'%')
         OR description like concat('%',#{keywords},'%') OR nameZh like concat('%',#{keywords},'%'))
@@ -77,7 +104,8 @@
         <if test="rolename!=null and rolename!=''">
             AND nameZh=#{rolename}
         </if>
-    </select>
+    </select>-->
+
 
     <update id="updateUser">
         update user

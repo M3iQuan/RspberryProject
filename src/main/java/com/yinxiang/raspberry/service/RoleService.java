@@ -42,16 +42,22 @@ public class RoleService {
             if(existUser == null) {
                 result.setMsg("用户不存在");
             }else {
-                int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
-                userRoleMapper.deleteRoleByUid(existUser.getId());
+//                int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
+//                userRoleMapper.deleteRoleByUid(existUser.getId());
                 if(userRoleMapper.getRidByName(rolename)==1) {  //判断是不是有人要改角色为管理员，如果有的画判断角色，只有是super可以
                     if(UserUtils.getCurrentUser().getUsername().equals("super")) {
+                        userRoleMapper.deleteRoleByUid(existUser.getId());
                         userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
+                        result.setSuccess(true);
                     }else {
-                        userRoleMapper.addRole(existUser.getId(),rid);
+//                        int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
+//                        userRoleMapper.deleteRoleByUid(existUser.getId());
+//                        userRoleMapper.addRole(existUser.getId(),rid);
                     }
                 }else {
+                    userRoleMapper.deleteRoleByUid(existUser.getId());
                     userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
+                    result.setSuccess(true);
                 }
 
 
@@ -73,7 +79,6 @@ public class RoleService {
                 }
                 System.out.println("更改成功！！！authorityallocation");
                 result.setMsg("添加成功");
-                result.setSuccess(true);
                 result.setStatus(222);
                 result.setDetail(user);
                 }

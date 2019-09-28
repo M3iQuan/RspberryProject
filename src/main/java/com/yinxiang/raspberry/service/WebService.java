@@ -21,6 +21,7 @@ public class WebService {
 
     public List<User> getUserByPage(Integer page, Integer size, String keywords, String username, String description,String rolename,List<String> areaname,int issuper) {
         int start = (page - 1) * size;
+        System.out.println(start + " : " + size);
         return userMapper.getUserByPage(start, size, keywords,username,description,rolename,areaname,issuper);
     }
 
