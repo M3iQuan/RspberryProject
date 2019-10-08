@@ -46,5 +46,8 @@ public class DeviceService {
         return deviceMapper.addDevice(device)+deviceMapper.addDevice_status(device.getId(),device.getStatusname());
     }
 
+    public int deleteDevice(String device_id) {
+        return deviceMapper.deleteDevice(device_id);
+    }
 
 }

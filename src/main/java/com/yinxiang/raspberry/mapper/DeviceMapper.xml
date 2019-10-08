@@ -17,7 +17,7 @@
     </select>
 
     <select id="getDeviceByPage" resultType="com.yinxiang.raspberry.model.Device">
-        select d.id,d.latitude,d.longitude,d.description,s.name,t.name,a.areaname
+        select d.id,d.latitude,d.longitude,d.description,s.name as statusname,t.name as type,a.areaname
         from device d,device_status ds,status s,area a,type t
         where d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
         AND (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
@@ -143,6 +143,9 @@
     <insert id="addDevice_status">
         insert into device_status(device_id,status_id,temp_status) values (#{device_id},(select id from status where name = #{statusname}),2)
     </insert>
+    <delete id="deleteDevice" parameterType="java.lang.String">
+        delete from device where id = #{device_id}
+    </delete>
 
 
 

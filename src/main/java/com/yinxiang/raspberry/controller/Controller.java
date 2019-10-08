@@ -200,6 +200,22 @@ public class Controller {
             return result;
         }
     }
+    @RequestMapping(value = "/deleteDevice", method = RequestMethod.POST)
+    public Result deleteDevice(@RequestBody Map<String,Object> data) {
+        System.out.println("device_id:" + data.get("device_id"));
+        Result result = new Result();
+        if (deviceService.deleteDevice((String)data.get("device_id")) == 1) {
+            result.setMsg("删除成功!");
+            result.setSuccess(true);
+            result.setStatus(200);
+            return result;
+        } else {
+            result.setMsg("删除失败!");
+            result.setSuccess(false);
+            result.setStatus(400);
+            return result;
+        }
+    }
 
     @RequestMapping(value = "/AuthorityAllocation", method = RequestMethod.POST) //权限分配
     public Result changeRole(User user, String rolename, String[] areaname) {

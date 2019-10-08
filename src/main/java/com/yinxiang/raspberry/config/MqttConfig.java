@@ -135,8 +135,20 @@ public class MqttConfig {
      * @return MessageChannel
      */
     //在线离线的
-    @Bean(name = "mqttInboundChannelOnLine")
-    public MessageChannel mqttInboundChannelOnLine(){
+    @Bean(name = "mqttInboundChannelOnLineNs")
+    public MessageChannel mqttInboundChannelOnLineNs(){
+        return new DirectChannel();
+    }
+    @Bean(name = "mqttInboundChannelOnLineBa")
+    public MessageChannel mqttInboundChannelOnLineBa(){
+        return new DirectChannel();
+    }
+    @Bean(name = "mqttInboundChannelOnLineFt")
+    public MessageChannel mqttInboundChannelOnLineFt(){
+        return new DirectChannel();
+    }
+    @Bean(name = "mqttInboundChannelOnLineLh")
+    public MessageChannel mqttInboundChannelOnLineLh(){
         return new DirectChannel();
     }
     //temperature_and_humidity
@@ -165,22 +177,76 @@ public class MqttConfig {
      * MQTT消息处理器(用于接收消息)
      * @return MessageHandler
      */
+    //南山区
     @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannelOnLine")
-    public MessageHandler handlerOnLine() {
+    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineNs")
+    public MessageHandler handlerOnLineNs() {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String[] deviceInformation = message.getPayload().toString().split("#");
                 //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
                 if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getOnLineSet().add(deviceInformation[0]);
+                    test.getNs_OnLineSet().add(deviceInformation[0]);
                 }else { //设备有故障，直接修改状态
                     deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
                 }
             }
         };
     }
+    //宝安区
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineBa")
+    public MessageHandler handlerOnLineBa() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String[] deviceInformation = message.getPayload().toString().split("#");
+                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
+                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
+                    test.getBa_OnLineSet().add(deviceInformation[0]);
+                }else { //设备有故障，直接修改状态
+                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
+                }
+            }
+        };
+    }
+    //福田区
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineFt")
+    public MessageHandler handlerOnLineFt() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String[] deviceInformation = message.getPayload().toString().split("#");
+                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
+                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
+                    test.getFt_OnLineSet().add(deviceInformation[0]);
+                }else { //设备有故障，直接修改状态
+                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
+                }
+            }
+        };
+    }
+    //罗湖区
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineLh")
+    public MessageHandler handlerOnLineLh() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String[] deviceInformation = message.getPayload().toString().split("#");
+                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
+                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
+                    test.getLh_OnLineSet().add(deviceInformation[0]);
+                }else { //设备有故障，直接修改状态
+                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
+                }
+            }
+        };
+    }
+
+
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataOne")
     public MessageHandler handlerDataOne() {
@@ -247,7 +313,6 @@ public class MqttConfig {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
                 String jsonData = message.getPayload().toString();
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> data = null;
@@ -270,21 +335,60 @@ public class MqttConfig {
      * @return MessageProducer
      */
     @Bean
-    //判断离线在线的topic
-    public MessageProducer inboundOnLine(){
+    //判断南山区离线在线的topic
+    public MessageProducer inboundOnLineNs(){
+        String id = serverId + "_online_ns";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId+"_online", mqttPahoClientFactory(), onlineTopic);
+                id, mqttPahoClientFactory(), onlineTopic+"_ns");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannelOnLine());
+        adapter.setOutputChannel(mqttInboundChannelOnLineNs());
         return adapter;
     }
     @Bean
+    //判断宝安区离线在线的topic
+    public MessageProducer inboundOnLineBa(){
+        String id = serverId + "_online_ba";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), onlineTopic+"_ba");
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelOnLineBa());
+        return adapter;
+    }
+    @Bean
+    //判断福田区离线在线的topic
+    public MessageProducer inboundOnLineFt(){
+        String id = serverId + "_online_ft";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), onlineTopic+"_ft");
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelOnLineFt());
+        return adapter;
+    }
+    @Bean
+    //判断罗湖区离线在线的topic
+    public MessageProducer inboundOnLineLh(){
+        String id = serverId + "_online_lh";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), onlineTopic+"_lh");
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelOnLineLh());
+        return adapter;
+    }
+
+    @Bean
     //接收temperature_and_humidity的topic
     public MessageProducer inboundDataOne(){
+        String id = serverId + "_device_temperature_and_humidity";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId+"_device_temperature_and_humidity", mqttPahoClientFactory(), "device/temperature_and_humidity");
+                id, mqttPahoClientFactory(), "device/temperature_and_humidity");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -294,8 +398,9 @@ public class MqttConfig {
     @Bean
     //接收air_light的topic
     public MessageProducer inboundDataTwo(){
+        String id = serverId+"_device_air_light";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId+"_device_air_light", mqttPahoClientFactory(), "device/air_light");
+                id, mqttPahoClientFactory(), "device/air_light");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -305,8 +410,9 @@ public class MqttConfig {
     @Bean
     //接收water的topic
     public MessageProducer inboundDataThree(){
+        String id = serverId + "_device_water";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId+"_device_water", mqttPahoClientFactory(), "device/water");
+                id, mqttPahoClientFactory(), "device/water");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
@@ -316,8 +422,9 @@ public class MqttConfig {
     @Bean
     //接收protector的topic
     public MessageProducer inboundDataFour(){
+        String id = serverId+"_device_protector";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                serverId+"_device_protector", mqttPahoClientFactory(), "device/protector");
+                id, mqttPahoClientFactory(), "device/protector");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

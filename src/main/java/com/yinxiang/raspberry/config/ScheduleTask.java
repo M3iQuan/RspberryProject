@@ -40,21 +40,35 @@ public class ScheduleTask {
     //@Order(1)
     //@Async
     //指定时间间隔，每5分钟执行一次
-    @Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "*/20 * * * * ?")
     //添加定时任务
     public void configureTasks2(){
         mqttService.sendToMqtt("device/online_test","say hello");
-        System.out.println(getCount() + " 广播状态");
-        System.out.println(test.getOnLineSet().size());
+       /* System.out.println(" 广播状态");
+        System.out.println("南山区在线设备: " + test.getNs_OnLineSet().size());
+        System.out.println("宝安区在线设备: " + test.getBa_OnLineSet().size());
+        System.out.println("福田区在线设备: " + test.getFt_OnLineSet().size());
+        System.out.println("罗湖区在线设备: " + test.getLh_OnLineSet().size());*/
         setCount(getCount()+1);
         if(getCount() >= 2) {
-            if(test.getOnLineSet().size() != 0) {
-                deviceInformationService.updateOnlineBySet(test.getOnLineSet());
+            if(test.getNs_OnLineSet().size() != 0) {
+                deviceInformationService.updateOnlineBySet(test.getNs_OnLineSet());
             }
-            test.getOnLineSet().clear();
-            System.out.println(test.getOnLineSet().size());
+            if(test.getBa_OnLineSet().size() != 0) {
+                deviceInformationService.updateOnlineBySet(test.getBa_OnLineSet());
+            }
+            if(test.getFt_OnLineSet().size() != 0) {
+                deviceInformationService.updateOnlineBySet(test.getFt_OnLineSet());
+            }
+            if(test.getLh_OnLineSet().size() != 0) {
+                deviceInformationService.updateOnlineBySet(test.getLh_OnLineSet());
+            }
+            test.setNs_OnLineSet(new HashSet<>());
+            test.setBa_OnLineSet(new HashSet<>());
+            test.setFt_OnLineSet(new HashSet<>());
+            test.setLh_OnLineSet(new HashSet<>());
             deviceInformationService.updateStates();
-            System.out.println(getCount() + "更新状态表");
+            //System.out.println("更新状态表");
             setCount(0);
         }
     }

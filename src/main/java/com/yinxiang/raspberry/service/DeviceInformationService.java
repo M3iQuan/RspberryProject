@@ -132,6 +132,12 @@ public class DeviceInformationService {
                     //当某个传感器故障时
                     if(device_status.charAt(i) == '1'){
                         insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
+                        Map<String, Object> payload= new HashMap<>();
+                        payload.put("device_id", device_id);
+                        payload.put("status_id", "4");
+                        payload.put("create_time", date_time);
+                        payload.put("description",sensorList.get(i-1).getName()+"传感器故障");
+                        mqttService.sendToMqtt("user/Order/error",payload.toString());
                     }
                 }
             }
@@ -145,6 +151,12 @@ public class DeviceInformationService {
                     //当某个传感器故障时
                     if(device_status.charAt(i) == '2'){
                         insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
+                        Map<String, Object> payload= new HashMap<>();
+                        payload.put("device_id", device_id);
+                        payload.put("status_id", "3");
+                        payload.put("create_time", date_time);
+                        payload.put("description",sensorList.get(i-1).getName()+"传感器数据异常");
+                        mqttService.sendToMqtt("user/Order/error",payload.toString());
                     }
                 }
             }
@@ -158,11 +170,23 @@ public class DeviceInformationService {
                     //当某个传感器故障时
                     if(device_status.charAt(i) == '1'){
                         insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
+                        Map<String, Object> payload= new HashMap<>();
+                        payload.put("device_id", device_id);
+                        payload.put("status_id", "4");
+                        payload.put("create_time", date_time);
+                        payload.put("description",sensorList.get(i-1).getName()+"传感器故障");
+                        mqttService.sendToMqtt("user/Order/error",payload.toString());
                     }
                 }else if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
                     //当某个传感器故障时
                     if(device_status.charAt(i) == '2'){
                         insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
+                        Map<String, Object> payload= new HashMap<>();
+                        payload.put("device_id", device_id);
+                        payload.put("status_id", "3");
+                        payload.put("create_time", date_time);
+                        payload.put("description",sensorList.get(i-1).getName()+"传感器数据异常");
+                        mqttService.sendToMqtt("user/Order/error", payload.toString());
                     }
                 }
             }
