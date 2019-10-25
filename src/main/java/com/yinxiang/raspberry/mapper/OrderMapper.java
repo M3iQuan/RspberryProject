@@ -10,4 +10,5 @@ import java.util.List;
 public interface OrderMapper {
     List<Order> getOrder(@Param("status") String status);
 
+    List<Order> getOrderByDid(@Param("did") String did);
 }

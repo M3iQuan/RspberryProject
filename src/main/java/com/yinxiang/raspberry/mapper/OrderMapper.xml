@@ -10,5 +10,8 @@
             order_status = #{status}
         </if>
     </select>
+    <select id="getOrderByDid" resultType="com.yinxiang.raspberry.model.Order">
+        select * from Order_staff where id = #{did}
+    </select>
 
 </mapper>
