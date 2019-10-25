@@ -38,4 +38,12 @@ public interface LocationMapper {
 
     //5.删除设备的GPS数据
     //Long deleteData(@Param("device_id") String device_id);
+
+    List<Area> getAreaByPid(int pid);
+
+    void addArea(@Param("area") Area area);
+
+    void deleteArea(@Param("area") Area area);
+
+    List<Area> getLeafAreaByParentId(@Param("pid") int pid);//可能要用到，传一个是父级的地点给我来获取该父级下的叶子节点
 }

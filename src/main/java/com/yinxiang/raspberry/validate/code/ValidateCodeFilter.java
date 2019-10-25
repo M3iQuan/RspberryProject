@@ -8,11 +8,8 @@ package com.yinxiang.raspberry.validate.code;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.stereotype.Component;
-
 import org.springframework.util.StringUtils;
-
 import org.springframework.web.filter.GenericFilterBean;
-
 
 
 import javax.servlet.*;
@@ -39,7 +36,8 @@ public class ValidateCodeFilter extends GenericFilterBean {
             System.out.println("request:"+request.toString());
             //String genCaptcha =requestCaptcha;
             String genCaptcha = (String) request.getSession().getAttribute("imageCode");
-            PrintWriter out = res.getWriter();  //不可以用getwriter（）方法来返回json数据了，因为ValidateController有用到getOutputStream,这两个不可以同时使用
+            //ServletOutputStream out = res.getOutputStream();  //不可以用getwriter（）方法来返回json数据了，因为ValidateController有用到getOutputStream,这两个不可以同时使用
+            PrintWriter out = res.getWriter();
             res.setCharacterEncoding("UTF-8");
             res.setContentType("application/json;charset=utf-8");
             Map<String, Object> map = new HashMap<>();
@@ -50,6 +48,7 @@ public class ValidateCodeFilter extends GenericFilterBean {
                 //((HttpServletResponse) res).sendError(400);
                 map.put("status",400);
                 ObjectMapper om = new ObjectMapper();
+                //out.print(om.writeValueAsString(map));
                 out.write(om.writeValueAsString(map));
                 out.flush();
                 out.close();
@@ -60,6 +59,7 @@ public class ValidateCodeFilter extends GenericFilterBean {
                 //((HttpServletResponse) res).setStatus(400);
                 map.put("status",400);
                 ObjectMapper om = new ObjectMapper();
+                //out.print(om.writeValueAsString(map));
                 out.write(om.writeValueAsString(map));
                 out.flush();
                 out.close();

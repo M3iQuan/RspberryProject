@@ -52,7 +52,7 @@ public class RoleService {
                     }
                 }else {
                     userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
-                }
+                } //这个ifelse是用来防止管理员创建管理员，好像是。如果不是超级用户来创建管理员是没有效果的
 
 
                 List<Area> areas = locationMapper.getAreaByUserId(UserUtils.getCurrentUser().getId());
@@ -62,16 +62,13 @@ public class RoleService {
                     Areanames.add(area.getArea_name());
                 }
                 userRoleMapper.deleteUserAreaByUid(existUser.getId(),Areanames);
-                System.out.println("daozhele");
                 for(int i=0;i<areaname.length;i++) {
                     //还要判断这些areaname是不是在areas里
-                    System.out.println(Areanames.contains(areaname[i]));
                     if(Areanames.contains(areaname[i])){
 
                         roleMapper.addUserArea(existUser.getId(),locationMapper.getAreaIdByAreaname(areaname[i]));
                     }
                 }
-                System.out.println("更改成功！！！authorityallocation");
                 result.setMsg("添加成功");
                 result.setSuccess(true);
                 result.setStatus(222);

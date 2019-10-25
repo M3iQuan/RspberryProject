@@ -12,7 +12,6 @@ public interface UserRoleMapper {
     void deleteRoleByUid(@Param("uid") Integer uid);
 
 
-    //可能需要一个获取全部角色的sql，用来在添加角色时，可以供选择。
     int getRidByName(String nameZh);
 
     String[] getAllRole();
@@ -20,4 +19,5 @@ public interface UserRoleMapper {
     int deleteUserAreaByUid(@Param("uid") Integer uid, @Param("areanames")List<String> areanames);
 
     //int addUserAreaByAreaname(@Param("uid") Integer uid,@Param("areaname") String areaname);
+
 }

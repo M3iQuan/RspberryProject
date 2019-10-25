@@ -209,5 +209,33 @@ public class Controller {
         return roleService.addRole(user, rolename, areaname);
     }
 
+    @RequestMapping(value = "/getAreaTree",method = RequestMethod.POST)
+    public List<Area> getAreaByid(int pid) {
+        return locationService.getAreaByid(pid);
+    }
+
+    @RequestMapping(value = "/addArea",method = RequestMethod.POST)
+    public Map<String,Object> addArea(String areaname,String parentname) {
+        Map<String, Object> map = new HashMap<>();
+        if(locationService.addArea(areaname,parentname)==1) {
+            map.put("status","success" );
+            return map;
+        }
+        map.put("status","fail" );
+        return map;
+    }
+
+    @RequestMapping(value = "/deleteArea", method = RequestMethod.POST)
+    public Map<String,Object> deleteDep(String areaname) {
+        Map<String, Object> map = new HashMap<>();
+        if (locationService.deleteArea(areaname) == 1) {
+            map.put("status", "success");
+            map.put("msg","删除成功！" );
+            return map;
+        }
+        map.put("status", "fail");
+        map.put("msg","删除失败！" );
+        return map;
+    }
 
 }
