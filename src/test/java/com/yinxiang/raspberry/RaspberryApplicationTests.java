@@ -2,6 +2,7 @@ package com.yinxiang.raspberry;
 
 import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.bean.AutoReclosingPowerProtector;
+import com.yinxiang.raspberry.mapper.DevicesMapper;
 import com.yinxiang.raspberry.mapper.LocationMapper;
 import com.yinxiang.raspberry.service.*;
 import org.junit.Test;
@@ -31,13 +32,16 @@ public class RaspberryApplicationTests {
 	LocationMapper locationMapper;
 	@Autowired
 	TempAndHumService tempAndHumService;
+	@Autowired
+	DevicesMapper devicesMapper;
+
 	@Test
 	public void contextLoads() {
-		List<Map<String,Object>> data= tempAndHumService.getKeyWords();
-		System.out.println(data.size());
-		for (int i = 0; i < data.size(); i++) {
-			System.out.println(data.get(i));
-		}
+		ArrayList<String> data = new ArrayList<>();
+		data.add("ns14997");
+		data.add("ns14994");
+		data.add("ns14993");
+		devicesMapper.updateOnlineByList(data);
 		/*Map<String, Object> data = new HashMap<>();
 		data.put("device_id", "yixg0000001");
 		data.put("pageSize", new Integer(10));

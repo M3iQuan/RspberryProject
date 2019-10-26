@@ -21,23 +21,28 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-
+@EnableAsync
 @Configuration
 @IntegrationComponentScan
 public class MqttConfig {
     @Value("${spring.mqtt.url}")
     private String hostUrl;
 
-    /*@Value("${spring.mqtt.username}")
+    @Value("${spring.mqtt.username}")
     private String username;
 
-    @Value("${spring.mqtt.password}")
+    /*@Value("${spring.mqtt.password}")
     private String password;*/
 
     @Value("${spring.mqtt.client.id}")
@@ -53,6 +58,15 @@ public class MqttConfig {
     @Value("${spring.mqtt.server.topic}")
     private String onlineTopic;
 
+    private String connectedTopic = "$SYS/brokers/emqx@127.0.0.1/clients/+/connected";
+    private String disconnectedTopic = "$SYS/brokers/emqx@127.0.0.1/clients/+/disconnected";
+    private String statusTopic = "/device/status";
+    private String tem_and_humTopic = "/device/data/temperature_and_humidity";
+    private String water_statusTopic = "/device/data/water";
+    private String air_lightTopic = "/device/data/air_light";
+    private String protectorTopic = "/device/data/protector";
+
+
     @Autowired
     DeviceInformationService deviceInformationService;
     @Autowired
@@ -63,6 +77,8 @@ public class MqttConfig {
     AutoReclosingPowerProtectorService autoReclosingPowerProtectorService;
     @Autowired
     AirLightService airLightService;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
     Test test;
 
@@ -84,11 +100,10 @@ public class MqttConfig {
     @Bean
     public MqttConnectOptions getMqttConnectOptions() {
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-        /*
         // 设置连接的用户名
         mqttConnectOptions.setUserName(username);
         // 设置连接的密码
-        mqttConnectOptions.setPassword(password.toCharArray());*/
+        //mqttConnectOptions.setPassword(password.toCharArray());
         mqttConnectOptions.setServerURIs(new String[]{hostUrl});
         // 设置超时时间 单位为秒
         mqttConnectOptions.setConnectionTimeout(30);
@@ -134,21 +149,19 @@ public class MqttConfig {
      * MQTT接收通道(用于接收消息)
      * @return MessageChannel
      */
-    //在线离线的
-    @Bean(name = "mqttInboundChannelOnLineNs")
-    public MessageChannel mqttInboundChannelOnLineNs(){
+    //在线的
+    @Bean(name = "mqttInboundChannelOnLine")
+    public MessageChannel mqttInboundChannelOnLine(){
         return new DirectChannel();
     }
-    @Bean(name = "mqttInboundChannelOnLineBa")
-    public MessageChannel mqttInboundChannelOnLineBa(){
+    //离线的
+    @Bean(name = "mqttInboundChannelOffLine")
+    public MessageChannel mqttInboundChannelOffLine(){
         return new DirectChannel();
     }
-    @Bean(name = "mqttInboundChannelOnLineFt")
-    public MessageChannel mqttInboundChannelOnLineFt(){
-        return new DirectChannel();
-    }
-    @Bean(name = "mqttInboundChannelOnLineLh")
-    public MessageChannel mqttInboundChannelOnLineLh(){
+    //状态变化的
+    @Bean(name = "mqttInboundChannelStatus")
+    public MessageChannel mqttInboundChannelStatus(){
         return new DirectChannel();
     }
     //temperature_and_humidity
@@ -161,7 +174,7 @@ public class MqttConfig {
     public MessageChannel mqttInboundChannelDataTwo(){
         return new DirectChannel();
     }
-    //water
+    //water_status
     @Bean(name = "mqttInboundChannelDataThree")
     public MessageChannel mqttInboundChannelDataThree(){
         return new DirectChannel();
@@ -177,75 +190,93 @@ public class MqttConfig {
      * MQTT消息处理器(用于接收消息)
      * @return MessageHandler
      */
-    //南山区
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineNs")
-    public MessageHandler handlerOnLineNs() {
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                String[] deviceInformation = message.getPayload().toString().split("#");
-                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
-                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getNs_OnLineSet().add(deviceInformation[0]);
-                }else { //设备有故障，直接修改状态
-                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
-                }
-            }
-        };
+    //处理函数
+    public static Map<String,Object> jsonString2Map(String content){
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> data = null;
+        try{
+            data = mapper.readValue(content,Map.class);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        return  data;
     }
-    //宝安区
+
+    //设备上线事件
     @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineBa")
-    public MessageHandler handlerOnLineBa() {
+    @ServiceActivator(inputChannel = "mqttInboundChannelOnLine")
+    public MessageHandler handlerOnLine() {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String[] deviceInformation = message.getPayload().toString().split("#");
-                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
-                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getBa_OnLineSet().add(deviceInformation[0]);
-                }else { //设备有故障，直接修改状态
-                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
-                }
-            }
-        };
-    }
-    //福田区
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineFt")
-    public MessageHandler handlerOnLineFt() {
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                String[] deviceInformation = message.getPayload().toString().split("#");
-                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
-                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getFt_OnLineSet().add(deviceInformation[0]);
-                }else { //设备有故障，直接修改状态
-                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
-                }
-            }
-        };
-    }
-    //罗湖区
-    @Bean
-    @ServiceActivator(inputChannel = "mqttInboundChannelOnLineLh")
-    public MessageHandler handlerOnLineLh() {
-        return new MessageHandler() {
-            @Override
-            public void handleMessage(Message<?> message) throws MessagingException {
-                String[] deviceInformation = message.getPayload().toString().split("#");
-                //System.out.println("device_id: " + deviceInformation[0] + " type_id: " + deviceInformation[1] + " date_time: " + deviceInformation[2] + " status_value: " + deviceInformation[3]);
-                if(deviceInformation[3].charAt(0) == '0') { //设备在线，加入在线列表
-                    test.getLh_OnLineSet().add(deviceInformation[0]);
-                }else { //设备有故障，直接修改状态
-                    deviceInformationService.updateStatesById(deviceInformation[0], deviceInformation[1], deviceInformation[2], deviceInformation[3]);
+                String jsonData = message.getPayload().toString();
+                Map<String, Object> data = jsonString2Map(jsonData);
+                String device_id = (String)data.get("username");
+                /*Long time = (Long) data.get("ts");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date date = new Date(time);*/
+                if(!"admin".equals(device_id)) {
+                    System.out.println("device: " + device_id + " is connected!") ;
+                    //更新数据表
+                    deviceInformationService.updateStates(device_id, new Integer(1));
+                    //使用Websocket发送数据
+                    data.clear();
+                    data.put("device_id", device_id);
+                    data.put("status", "正常");
+                    simpMessagingTemplate.convertAndSend("/topic/status", data);
                 }
             }
         };
     }
 
+
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelOffLine")
+    public MessageHandler handlerOffLine() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String jsonData = message.getPayload().toString();
+                Map<String, Object> data = jsonString2Map(jsonData);
+                String device_id = (String)data.get("username");
+                /*Long time = (Long) data.get("ts");
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date date = new Date(time);*/
+                if(!"admin".equals(device_id)) {
+                    System.out.println("device: " + device_id + " is disconnected!") ;
+                    //更新数据表
+                    deviceInformationService.updateStates(device_id, new Integer(2));
+                    data.clear();
+                    data.put("device_id", device_id);
+                    data.put("status", "离线");
+                    simpMessagingTemplate.convertAndSend("/topic/status", data);
+                }
+            }
+        };
+    }
+    //设备状态变化
+    @Bean
+    @ServiceActivator(inputChannel = "mqttInboundChannelStatus")
+    public MessageHandler handlerStatus() {
+        return new MessageHandler() {
+            @Override
+            public void handleMessage(Message<?> message) throws MessagingException {
+                String jsonData = message.getPayload().toString();
+                Map<String, Object> data = jsonString2Map(jsonData);
+                String device_id = (String) data.get("device_id");
+                String type_id = (String) data.get("type_id");
+                String date_time = (String) data.get("date_time");
+                String device_status = (String) data.get("device_status");
+                System.out.println("device_status: " + device_status);
+                if(device_status.equals("000000000")){
+                    System.out.println("device is normal");
+                }else{
+                    System.out.println("device has an error");
+                    deviceInformationService.updateStatesById(device_id, type_id, date_time, device_status);
+                }
+            }
+        };
+    }
 
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataOne")
@@ -253,17 +284,10 @@ public class MqttConfig {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
                 String jsonData = message.getPayload().toString();
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> data = null;
-                try {
-                    data = mapper.readValue(jsonData, Map.class);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                tempAndHumService.saveData(data);
-                //System.out.println(topic + " receive message " + jsonData);
+                Map<String, Object> data = jsonString2Map(jsonData);
+                test.getTemperature_and_humidity_data().add(data);
+                //tempAndHumService.saveData(data);
             }
         };
     }
@@ -273,17 +297,10 @@ public class MqttConfig {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
                 String jsonData = message.getPayload().toString();
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> data = null;
-                try {
-                    data = mapper.readValue(jsonData, Map.class);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                airLightService.saveData(data);
-                //System.out.println(topic + " receive message " + jsonData);
+                Map<String, Object> data = jsonString2Map(jsonData);
+                test.getAir_light_data().add(data);
+                //airLightService.saveData(data);
             }
         };
     }
@@ -293,17 +310,10 @@ public class MqttConfig {
         return new MessageHandler() {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
-                String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
                 String jsonData = message.getPayload().toString();
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> data = null;
-                try {
-                    data = mapper.readValue(jsonData, Map.class);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                waterService.saveData(data);
-                //System.out.println(topic + " receive message " + jsonData);
+                Map<String, Object> data = jsonString2Map(jsonData);
+                test.getWater_data().add(data);
+                //waterService.saveData(data);
             }
         };
     }
@@ -314,15 +324,9 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> data = null;
-                try {
-                    data = mapper.readValue(jsonData, Map.class);
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
-                autoReclosingPowerProtectorService.saveData(data);
-                //System.out.println(topic + " receive message " + jsonData);
+                Map<String, Object> data = jsonString2Map(jsonData);
+                test.getProtector_data().add(data);
+                //autoReclosingPowerProtectorService.saveData(data);
             }
         };
     }
@@ -334,97 +338,85 @@ public class MqttConfig {
      * MQTT消息订阅绑定
      * @return MessageProducer
      */
-    @Bean
-    //判断南山区离线在线的topic
-    public MessageProducer inboundOnLineNs(){
-        String id = serverId + "_online_ns";
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), onlineTopic+"_ns");
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannelOnLineNs());
-        return adapter;
-    }
-    @Bean
-    //判断宝安区离线在线的topic
-    public MessageProducer inboundOnLineBa(){
-        String id = serverId + "_online_ba";
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), onlineTopic+"_ba");
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannelOnLineBa());
-        return adapter;
-    }
-    @Bean
-    //判断福田区离线在线的topic
-    public MessageProducer inboundOnLineFt(){
-        String id = serverId + "_online_ft";
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), onlineTopic+"_ft");
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannelOnLineFt());
-        return adapter;
-    }
-    @Bean
-    //判断罗湖区离线在线的topic
-    public MessageProducer inboundOnLineLh(){
-        String id = serverId + "_online_lh";
-        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), onlineTopic+"_lh");
-        adapter.setCompletionTimeout(5000);
-        adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
-        adapter.setOutputChannel(mqttInboundChannelOnLineLh());
-        return adapter;
-    }
 
+    //在线
     @Bean
+    public MessageProducer inboundOnLine(){
+        String id = serverId + "_online";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), connectedTopic);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelOnLine());
+        return adapter;
+    }
+    //离线
+    @Bean
+    public MessageProducer inboundOffLine(){
+        String id = serverId + "_offline";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), disconnectedTopic);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelOffLine());
+        return adapter;
+    }
+    //状态变化
+    @Bean
+    public MessageProducer inboundStatus(){
+        String id = serverId + "_status";
+        MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
+                id, mqttPahoClientFactory(), statusTopic);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        adapter.setOutputChannel(mqttInboundChannelStatus());
+        return adapter;
+    }
     //接收temperature_and_humidity的topic
+    @Bean
     public MessageProducer inboundDataOne(){
         String id = serverId + "_device_temperature_and_humidity";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), "device/temperature_and_humidity");
+                id, mqttPahoClientFactory(), /*"device/temperature_and_humidity"*/ tem_and_humTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
         adapter.setOutputChannel(mqttInboundChannelDataOne());
         return adapter;
     }
-    @Bean
     //接收air_light的topic
+    @Bean
     public MessageProducer inboundDataTwo(){
         String id = serverId+"_device_air_light";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), "device/air_light");
+                id, mqttPahoClientFactory(), /*"device/air_light"*/ air_lightTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
         adapter.setOutputChannel(mqttInboundChannelDataTwo());
         return adapter;
     }
+    //接收water_status的topic
     @Bean
-    //接收water的topic
     public MessageProducer inboundDataThree(){
         String id = serverId + "_device_water";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), "device/water");
+                id, mqttPahoClientFactory(), /*"device/water"*/ water_statusTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);
         adapter.setOutputChannel(mqttInboundChannelDataThree());
         return adapter;
     }
-    @Bean
     //接收protector的topic
+    @Bean
     public MessageProducer inboundDataFour(){
         String id = serverId+"_device_protector";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), "device/protector");
+                id, mqttPahoClientFactory(), /*"device/protector"*/ protectorTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

@@ -3,17 +3,20 @@ package com.yinxiang.raspberry.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yinxiang.raspberry.bean.*;
+import com.yinxiang.raspberry.mapper.DeviceMapper;
 import com.yinxiang.raspberry.mapper.DevicesMapper;
 import com.yinxiang.raspberry.mapper.SensorMapper;
 import com.yinxiang.raspberry.mapper.TypeMapper;
+import org.apache.ibatis.session.ExecutorType;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Transactional
@@ -40,6 +43,8 @@ public class DeviceInformationService {
     DeviceService deviceService;
     @Autowired
     AirLightService airLightService;
+    @Autowired
+    SqlSessionTemplate sqlSessionTemplate;
 
     //1.获取设备传感器信息
     public DeviceInformation findSensorsInformationById(String device_id) {
@@ -61,6 +66,7 @@ public class DeviceInformationService {
         return  deviceInformation;
     }
 
+    //2.获取设备传感器数据
     public String findSensorsData(String device_id){
         Device device = deviceMapper.findDataById(device_id);
         List<Sensor> sensorList = sensorMapper.findAllSensors();
@@ -103,7 +109,7 @@ public class DeviceInformationService {
         return  payload;
     }
 
-    //2.根据用户信息获取用户所在区域的设备信息汇总
+    //3.根据用户信息获取用户所在区域的设备信息汇总
     public TotalDevices findTotalDevicesByUserId(Integer id){
         TotalDevices totalDevices = new TotalDevices();
         totalDevices.setTotalNum(deviceMapper.findTotalNumByUserId(id));
@@ -111,6 +117,38 @@ public class DeviceInformationService {
         totalDevices.setErrNum(deviceMapper.findErrNumByUserId(id));
         totalDevices.setTotalData(deviceMapper.findTotalData());
         return totalDevices;
+    }
+
+    //4.批量更新数据
+    public void batchUpdateStates(HashSet<String> data){
+        SqlSession sqlSession = null;
+        List<String> a = new ArrayList<>(data);
+        try{
+            sqlSession = sqlSessionTemplate.getSqlSessionFactory().openSession(ExecutorType.BATCH, false);
+            int batchCount = 1000;
+            int batchLastIndex = batchCount;
+            for(int index = 0; index < data.size();){
+                if(batchLastIndex >= data.size()){
+                    batchLastIndex = data.size();
+                    sqlSession.update("com.yinxiang.raspberry.mapper.DevicesMapper.updateOnlineByList", a.subList(index, batchLastIndex));
+                    sqlSession.commit();
+                    System.out.println("index: " + index + " batchLastIndex: " + batchLastIndex);
+                    System.out.println("插入完毕");
+                    break;
+                }else{
+                    sqlSession.update("com.yinxiang.raspberry.mapper.DevicesMapper.updateOnlineByList", a.subList(index, batchLastIndex));
+                    sqlSession.commit();
+                    System.out.println("index: " + index + " batchLastIndex: " + batchLastIndex);
+                    index = batchLastIndex;
+                    batchLastIndex = index + (batchCount - 1);
+                }
+            }
+            sqlSession.commit();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }finally{
+            sqlSession.close();
+        }
     }
 
     public void updateOnlineBySet(HashSet<String> data){
@@ -194,7 +232,7 @@ public class DeviceInformationService {
         deviceMapper.updateStateById(data);
     }
 
-
+    @Async
     public void updateStates(String device_id, Integer status_id){
         Map<String,Object> data = new HashMap<>();
         data.put("device_id", device_id);

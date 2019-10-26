@@ -3,49 +3,47 @@ package com.yinxiang.raspberry.bean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class Test {
-    private HashSet<String> ns_OnLineSet = new HashSet<>();
-    private HashSet<String> ft_OnLineSet = new HashSet<>();
-    private HashSet<String> ba_OnLineSet = new HashSet<>();
-    private HashSet<String> lh_OnLineSet = new HashSet<>();
+    private List<Map<String, Object>> temperature_and_humidity_data = new ArrayList<>();
+    private List<Map<String, Object>> air_light_data = new ArrayList<>();
+    private List<Map<String, Object>> water_data = new ArrayList<>();
+    private List<Map<String, Object>> protector_data = new ArrayList<>();
 
     public Test() {
     }
 
-    public HashSet<String> getNs_OnLineSet() {
-        return ns_OnLineSet;
+    public List<Map<String, Object>> getTemperature_and_humidity_data() {
+        return temperature_and_humidity_data;
     }
 
-    public void setNs_OnLineSet(HashSet<String> ns_OnLineSet) {
-        this.ns_OnLineSet = ns_OnLineSet;
+    public void setTemperature_and_humidity_data(List<Map<String, Object>> temperature_and_humidity_data) {
+        this.temperature_and_humidity_data = temperature_and_humidity_data;
     }
 
-    public HashSet<String> getFt_OnLineSet() {
-        return ft_OnLineSet;
+    public List<Map<String, Object>> getAir_light_data() {
+        return air_light_data;
     }
 
-    public void setFt_OnLineSet(HashSet<String> ft_OnLineSet) {
-        this.ft_OnLineSet = ft_OnLineSet;
+    public void setAir_light_data(List<Map<String, Object>> air_light_data) {
+        this.air_light_data = air_light_data;
     }
 
-    public HashSet<String> getBa_OnLineSet() {
-        return ba_OnLineSet;
+    public List<Map<String, Object>> getWater_data() {
+        return water_data;
     }
 
-    public void setBa_OnLineSet(HashSet<String> ba_OnLineSet) {
-        this.ba_OnLineSet = ba_OnLineSet;
+    public void setWater_data(List<Map<String, Object>> water_data) {
+        this.water_data = water_data;
     }
 
-    public HashSet<String> getLh_OnLineSet() {
-        return lh_OnLineSet;
+    public List<Map<String, Object>> getProtector_data() {
+        return protector_data;
     }
 
-    public void setLh_OnLineSet(HashSet<String> lh_OnLineSet) {
-        this.lh_OnLineSet = lh_OnLineSet;
+    public void setProtector_data(List<Map<String, Object>> protector_data) {
+        this.protector_data = protector_data;
     }
 }

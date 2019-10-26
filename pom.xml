@@ -73,6 +73,12 @@
 			<artifactId>spring-integration-mqtt</artifactId>
 		</dependency>
 
+		<!--WebSocket-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
 		<!-- Swagger2 依赖-->
 		<dependency>
 			<groupId>io.springfox</groupId>

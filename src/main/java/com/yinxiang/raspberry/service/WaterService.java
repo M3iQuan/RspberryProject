@@ -19,8 +19,6 @@ public class WaterService {
     @Autowired
     WaterMapper waterMapper;
     @Autowired
-    DeviceInformationService deviceInformationService;
-    @Autowired
     DeviceService deviceService;
     @Autowired
     MqttService mqttService;

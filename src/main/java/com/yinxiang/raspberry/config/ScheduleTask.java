@@ -11,7 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -26,29 +28,38 @@ public class ScheduleTask {
     @Autowired
     Test test;
 
-    //@Order(2)
     //@Async
     //指定时间间隔，每5分钟执行一次
-    //@Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/55 * * * * ?")
     //添加定时任务
-    /*public void configureTasks1(){
-        //重置状态表
-        System.out.println("更新状态表");
-        deviceInformationService.updateStates();
-    }*/
+    public void configureTasks(){
+        if (test.getTemperature_and_humidity_data().size() != 0) {
+            System.out.println("total data number of temperature_and_humidity: " + test.getTemperature_and_humidity_data().size());
+            test.getTemperature_and_humidity_data().clear();
+        }
+        if (test.getAir_light_data().size() != 0) {
+            System.out.println("total data number of air_light :" + test.getAir_light_data().size());
+            test.getAir_light_data().clear();
+        }
+        if (test.getWater_data().size() != 0) {
+            System.out.println("total data number of water: " + test.getWater_data().size());
+            test.getWater_data().clear();
+        }
+        if (test.getProtector_data().size() != 0) {
+            System.out.println("total data number of protector: " + test.getProtector_data().size());
+            test.getProtector_data().clear();
+        }
+    }
 
-    //@Order(1)
-    //@Async
-    //指定时间间隔，每5分钟执行一次
-    @Scheduled(cron = "*/20 * * * * ?")
+    //@Scheduled(cron = "*/20 * * * * ?")
     //添加定时任务
-    public void configureTasks2(){
+    /*public void configureTasks2(){
         mqttService.sendToMqtt("device/online_test","say hello");
-       /* System.out.println(" 广播状态");
+        System.out.println(" 广播状态");
         System.out.println("南山区在线设备: " + test.getNs_OnLineSet().size());
         System.out.println("宝安区在线设备: " + test.getBa_OnLineSet().size());
         System.out.println("福田区在线设备: " + test.getFt_OnLineSet().size());
-        System.out.println("罗湖区在线设备: " + test.getLh_OnLineSet().size());*/
+        System.out.println("罗湖区在线设备: " + test.getLh_OnLineSet().size());
         setCount(getCount()+1);
         if(getCount() >= 2) {
             if(test.getNs_OnLineSet().size() != 0) {
@@ -68,10 +79,10 @@ public class ScheduleTask {
             test.setFt_OnLineSet(new HashSet<>());
             test.setLh_OnLineSet(new HashSet<>());
             deviceInformationService.updateStates();
-            //System.out.println("更新状态表");
+            System.out.println("更新状态表");
             setCount(0);
         }
-    }
+    }*/
 
     public int getCount() {
         return count;
