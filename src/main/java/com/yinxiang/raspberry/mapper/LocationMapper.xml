@@ -10,7 +10,7 @@
     </resultMap>
 
     <resultMap id="AreaMap" type="com.yinxiang.raspberry.bean.Area">
-        <result column="areaname" property="area_name"></result>
+        <result column="areaname" property="area_name"/>
     </resultMap>
 
     <!--GPS的列名-->
@@ -76,6 +76,29 @@
 
     <select id="getAreaIdByAreaname" resultType="int">
         select aid from area where areaname = #{areaname}
+    </select>
+
+    <resultMap id="BaseResultMap" type="com.yinxiang.raspberry.bean.Area">
+        <id property="id" column="aid"/>
+        <result column="areaname" property="area_name"/>
+        <result column="parentId" property="parentId"/>
+        <result column="isparent" property="isparent"/>
+        <result column="areapath" property="areapath"/>
+        <collection property="children" ofType="com.yinxiang.raspberry.bean.Area" select="com.yinxiang.raspberry.mapper.LocationMapper.getAreaByPid" column="aid">
+        </collection>
+    </resultMap>
+    <select id="getAreaByPid" resultMap="BaseResultMap">
+        select a.* from area a where a.`parentId`=#{pid};
+    </select>
+
+    <select id="addArea" statementType="CALLABLE">
+        call addArea(#{area.area_name,mode=IN,jdbcType=VARCHAR},#{area.parentId,mode=IN,jdbcType=INTEGER},#{area.result,mode=OUT,jdbcType=INTEGER},#{area.id,mode=OUT,jdbcType=INTEGER})
+    </select>
+    <select id="deleteArea" statementType="CALLABLE">
+        call deleteArea(#{area.id,mode=IN,jdbcType=INTEGER},#{area.result,mode=OUT,jdbcType=INTEGER})
+    </select>
+    <select id="getLeafAreaByParentId" resultMap="BaseResultMap">
+        select a.aid,a.areaname from area a where isparent==0 and areapath like concat('%',#{pid},'%')
     </select>
 
     <!--    &lt;!&ndash;3.新增设备的GPS数据&ndash;&gt;

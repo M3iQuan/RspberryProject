@@ -141,4 +141,13 @@ public class User implements UserDetails {
                 '}';
     }
 
+    public boolean equals(Object rhs) {
+        return rhs instanceof User ? this.username.equals(((User)rhs).username):false;
+    }
+
+    public int hashCode() {
+        return this.username.hashCode();
+    }
+
+
 }

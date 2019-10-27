@@ -65,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override  //解决静态资源被拦截的问题，下面的忽略拦截，下面的路径不会走安全验证
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**");//,"/manage","/basic/**","/device/**");
+        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**","/**");//,"/manage","/basic/**","/device/**");
     }
 
 
@@ -86,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 //.defaultSuccessUrl()  这个可以用在登录成功后默认跳转的页面，比如用户首页
-                /*.loginPage("/login_p")*/
+                //.loginPage("/login_p")
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
@@ -158,20 +158,20 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     }
                 })
                 .logoutSuccessHandler(new LogoutSuccessHandler() {
-                            @Override
-                            public void onLogoutSuccess(HttpServletRequest req,
-                                                        HttpServletResponse resp,
-                                                        Authentication auth)
-                                    throws IOException {
-                                resp.setContentType("application/json;charset=utf-8");
-                                Result respBean = new Result();
-                                respBean.setStatus(203);
-                                respBean.setSuccess(true);
-                                ObjectMapper om = new ObjectMapper();
-                                PrintWriter out = resp.getWriter();
-                                out.write(om.writeValueAsString(respBean));
-                                out.flush();
-                                out.close();
+                    @Override
+                    public void onLogoutSuccess(HttpServletRequest req,
+                                                HttpServletResponse resp,
+                                                Authentication auth)
+                            throws IOException {
+                        resp.setContentType("application/json;charset=utf-8");
+                        Result respBean = new Result();
+                        respBean.setStatus(203);
+                        respBean.setSuccess(true);
+                        ObjectMapper om = new ObjectMapper();
+                        PrintWriter out = resp.getWriter();
+                        out.write(om.writeValueAsString(respBean));
+                        out.flush();
+                        out.close();
                     }
                 })
                 .permitAll()
@@ -179,6 +179,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .cors();
+
+        http.sessionManagement().maximumSessions(1).expiredUrl("/xiaji");
     }
     @Bean
     CustomFilterInvocationSecurityMetadataSource cfisms() {

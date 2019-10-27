@@ -42,23 +42,17 @@ public class RoleService {
             if(existUser == null) {
                 result.setMsg("用户不存在");
             }else {
-//                int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
-//                userRoleMapper.deleteRoleByUid(existUser.getId());
+                int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
+                userRoleMapper.deleteRoleByUid(existUser.getId());
                 if(userRoleMapper.getRidByName(rolename)==1) {  //判断是不是有人要改角色为管理员，如果有的画判断角色，只有是super可以
                     if(UserUtils.getCurrentUser().getUsername().equals("super")) {
-                        userRoleMapper.deleteRoleByUid(existUser.getId());
                         userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
-                        result.setSuccess(true);
                     }else {
-//                        int rid = roleMapper.getRidByUserId(existUser.getId());  //在删除之前存起来，不然找不到
-//                        userRoleMapper.deleteRoleByUid(existUser.getId());
-//                        userRoleMapper.addRole(existUser.getId(),rid);
+                        userRoleMapper.addRole(existUser.getId(),rid);
                     }
                 }else {
-                    userRoleMapper.deleteRoleByUid(existUser.getId());
                     userRoleMapper.addRole(existUser.getId(),userRoleMapper.getRidByName(rolename));
-                    result.setSuccess(true);
-                }
+                } //这个ifelse是用来防止管理员创建管理员，好像是。如果不是超级用户来创建管理员是没有效果的
 
 
                 List<Area> areas = locationMapper.getAreaByUserId(UserUtils.getCurrentUser().getId());
@@ -68,17 +62,15 @@ public class RoleService {
                     Areanames.add(area.getArea_name());
                 }
                 userRoleMapper.deleteUserAreaByUid(existUser.getId(),Areanames);
-                System.out.println("daozhele");
                 for(int i=0;i<areaname.length;i++) {
                     //还要判断这些areaname是不是在areas里
-                    System.out.println(Areanames.contains(areaname[i]));
                     if(Areanames.contains(areaname[i])){
 
                         roleMapper.addUserArea(existUser.getId(),locationMapper.getAreaIdByAreaname(areaname[i]));
                     }
                 }
-                System.out.println("更改成功！！！authorityallocation");
                 result.setMsg("添加成功");
+                result.setSuccess(true);
                 result.setStatus(222);
                 result.setDetail(user);
                 }

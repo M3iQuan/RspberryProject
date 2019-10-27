@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yinxiang.raspberry.mapper.OrderMapper">
+
+    <select id="getOrder" resultType="com.yinxiang.raspberry.model.Order">
+        select * from Order_staff where
+        <if test="status != null and status != ''">
+            order_status = #{status}
+        </if>
+    </select>
+    <select id="getOrderByDid" resultType="com.yinxiang.raspberry.model.Order">
+        select * from Order_staff where id = #{did}
+    </select>
+
+</mapper>

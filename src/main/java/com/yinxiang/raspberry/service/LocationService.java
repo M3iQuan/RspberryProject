@@ -48,6 +48,23 @@ public class LocationService {
         return locationMapper.findDataByArea(area_name);
     }
 
+    public List<Area> getAreaByid(int pid) {
+        return locationMapper.getAreaByPid(pid);
+    }
+
+    public int addArea(String areaname,String parentname) {
+        Area area = new Area();
+        area.setArea_name(areaname);
+        area.setParentId(locationMapper.getAreaIdByAreaname(parentname));
+        locationMapper.addArea(area);
+        return area.getResult();
+    }
+    public int deleteArea(String areaname) {
+        Area area = new Area();
+        area.setId(locationMapper.getAreaIdByAreaname(areaname));
+        locationMapper.deleteArea(area);
+        return area.getResult();
+    }
 
     //3.新增设备GPS数据
     /*public Long saveData(Location location) {
