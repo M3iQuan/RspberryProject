@@ -3,7 +3,7 @@ package com.yinxiang.raspberry.bean;
 public class Type {
 
     /**
-     * 设备号
+     * 种类号
      */
     private Long type_id;
 

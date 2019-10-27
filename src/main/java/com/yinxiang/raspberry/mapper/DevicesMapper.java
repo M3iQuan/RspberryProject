@@ -51,4 +51,9 @@ public interface DevicesMapper {
 
     //根据用户信息获取所在区域的所有异常/故障信息
     List<ErrDevices> findErrDeviceByUserId(@Param("id") Integer id);
+
+    //设备上线
+    void connect(@Param("device_id") String device_id);
+    //设备下线
+    void disconnect(@Param("device_id") String device_id);
 }

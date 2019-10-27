@@ -65,7 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override  //解决静态资源被拦截的问题，下面的忽略拦截，下面的路径不会走安全验证
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**","/**");//,"/manage","/basic/**","/device/**");
+        web.ignoring().antMatchers("/index.html", "login_p","/static/**","/code/image/**");//,"/manage","/basic/**","/device/**");
     }
 
 

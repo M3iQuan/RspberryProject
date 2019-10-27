@@ -202,6 +202,7 @@ public class MqttConfig {
         return  data;
     }
 
+
     //设备上线事件
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelOnLine")
@@ -212,24 +213,18 @@ public class MqttConfig {
                 String jsonData = message.getPayload().toString();
                 Map<String, Object> data = jsonString2Map(jsonData);
                 String device_id = (String)data.get("username");
-                /*Long time = (Long) data.get("ts");
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = new Date(time);*/
                 if(!"admin".equals(device_id)) {
                     System.out.println("device: " + device_id + " is connected!") ;
-                    //更新数据表
-                    deviceInformationService.updateStates(device_id, new Integer(1));
-                    //使用Websocket发送数据
+                    deviceInformationService.connect(device_id);  //更新数据表
                     data.clear();
                     data.put("device_id", device_id);
                     data.put("status", "正常");
-                    simpMessagingTemplate.convertAndSend("/topic/status", data);
+                    simpMessagingTemplate.convertAndSend("/topic/status", data); //使用Websocket发送数据
                 }
             }
         };
     }
-
-
+    //设备下线事件
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelOffLine")
     public MessageHandler handlerOffLine() {
@@ -239,13 +234,10 @@ public class MqttConfig {
                 String jsonData = message.getPayload().toString();
                 Map<String, Object> data = jsonString2Map(jsonData);
                 String device_id = (String)data.get("username");
-                /*Long time = (Long) data.get("ts");
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date date = new Date(time);*/
                 if(!"admin".equals(device_id)) {
                     System.out.println("device: " + device_id + " is disconnected!") ;
                     //更新数据表
-                    deviceInformationService.updateStates(device_id, new Integer(2));
+                    deviceInformationService.disconnect(device_id); //更新数据表
                     data.clear();
                     data.put("device_id", device_id);
                     data.put("status", "离线");
@@ -263,20 +255,13 @@ public class MqttConfig {
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
                 Map<String, Object> data = jsonString2Map(jsonData);
-                String device_id = (String) data.get("device_id");
-                String type_id = (String) data.get("type_id");
-                String date_time = (String) data.get("date_time");
-                String device_status = (String) data.get("device_status");
-                System.out.println("device_status: " + device_status);
-                if(device_status.equals("000000000")){
-                    System.out.println("device is normal");
-                }else{
-                    System.out.println("device has an error");
-                    deviceInformationService.updateStatesById(device_id, type_id, date_time, device_status);
-                }
+                //Map<String, Object> payload = deviceInformationService.handlerStatus(data);
+                //simpMessagingTemplate.convertAndSend("/topic/status", payload);
             }
         };
     }
+
+
 
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataOne")

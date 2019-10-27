@@ -155,83 +155,8 @@ public class DeviceInformationService {
         deviceMapper.updateOnlineBySet(data);
     }
 
-    public void updateStatesById(String device_id, String type_id, String date_time, String device_status){
-        Map<String,Object> data = new HashMap<>();
-        //获取所有传感器，用于判断设备含有什么传感器
-        List<Sensor> sensorList = sensorMapper.findAllSensors();
-        Type deviceType = typeMapper.findDataById(new Long(type_id));
-        if(device_status.charAt(0) == '1'){ //设备只有传感器故障 error
-            data.put("device_id", device_id);
-            data.put("status_id", new Integer(4));
-            //System.out.println(device_id + "设备有传感器故障");
-            for(int i = 1; i < device_status.length(); i++){
-                //当设备有某个传感器时
-                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                    //当某个传感器故障时
-                    if(device_status.charAt(i) == '1'){
-                        insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
-                        Map<String, Object> payload= new HashMap<>();
-                        payload.put("device_id", device_id);
-                        payload.put("status_id", "4");
-                        payload.put("create_time", date_time);
-                        payload.put("description",sensorList.get(i-1).getName()+"传感器故障");
-                        mqttService.sendToMqtt("user/Order/error",payload.toString());
-                    }
-                }
-            }
-        }else if(device_status.charAt(0) == '2'){  //设备只有数据异常 warn
-            data.put("device_id", device_id);
-            data.put("status_id", new Integer(3));
-            //System.out.println(device_id + "设备有数据异常");
-            for(int i = 1; i < device_status.length(); i++){
-                //当设备有某个传感器时
-                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                    //当某个传感器故障时
-                    if(device_status.charAt(i) == '2'){
-                        insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
-                        Map<String, Object> payload= new HashMap<>();
-                        payload.put("device_id", device_id);
-                        payload.put("status_id", "3");
-                        payload.put("create_time", date_time);
-                        payload.put("description",sensorList.get(i-1).getName()+"传感器数据异常");
-                        mqttService.sendToMqtt("user/Order/error",payload.toString());
-                    }
-                }
-            }
-        }else{  //设备既有传感器故障和数据异常
-            data.put("device_id", device_id);
-            data.put("status_id", new Integer(4));
-            //System.out.println(device_id + "设备既有传感器故障又有传感器异常");
-            for(int i = 1; i < device_status.length(); i++){
-                //当设备有某个传感器时
-                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                    //当某个传感器故障时
-                    if(device_status.charAt(i) == '1'){
-                        insertErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器故障");
-                        Map<String, Object> payload= new HashMap<>();
-                        payload.put("device_id", device_id);
-                        payload.put("status_id", "4");
-                        payload.put("create_time", date_time);
-                        payload.put("description",sensorList.get(i-1).getName()+"传感器故障");
-                        mqttService.sendToMqtt("user/Order/error",payload.toString());
-                    }
-                }else if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){
-                    //当某个传感器故障时
-                    if(device_status.charAt(i) == '2'){
-                        insertErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
-                        Map<String, Object> payload= new HashMap<>();
-                        payload.put("device_id", device_id);
-                        payload.put("status_id", "3");
-                        payload.put("create_time", date_time);
-                        payload.put("description",sensorList.get(i-1).getName()+"传感器数据异常");
-                        mqttService.sendToMqtt("user/Order/error", payload.toString());
-                    }
-                }
-            }
-        }
-        deviceMapper.updateStateById(data);
-    }
 
+    //修改设备状态
     @Async
     public void updateStates(String device_id, Integer status_id){
         Map<String,Object> data = new HashMap<>();
@@ -239,6 +164,130 @@ public class DeviceInformationService {
         data.put("status_id", status_id);
         deviceMapper.updateStateById(data);
     }
+
+    /**
+     * 设备上线
+     * @param device_id 设备号
+     */
+    @Async
+    public void connect(String device_id){
+        deviceMapper.connect(device_id);
+    }
+
+    /**
+     * 设备下线
+     * @param device_id 设备号
+     */
+    @Async
+    public void disconnect(String device_id) {
+        deviceMapper.disconnect(device_id);
+    }
+
+    /**
+     * 设备状态改变时进行处理，判断是从正常变成故障，还是从故障变成正常
+     * @param data Map里面包含device_id(String), type_id(String), date_time(String), device_status(String)
+     * @return payload Map里面包含device_id(String), status(String)
+     */
+    public Map<String, Object> handlerStatus(Map<String, Object> data){
+        Map<String, Object> payload = new HashMap<>();
+        String device_id = (String) data.get("device_id");
+        String type_id = (String) data.get("type_id");
+        String date_time = (String) data.get("date_time");
+        String device_status = (String) data.get("device_status");
+        if(device_status.equals("000000000")){ //设备恢复正常
+            System.out.println(device_id + " is normal");
+            updateStates(device_id, new Integer(1));
+            payload.put("device_id", device_id);
+            payload.put("status", "正常");
+        }else { //设备有故障或异常
+            System.out.println(device_id + " is err!");
+            payload = judgeErrType(device_id, type_id, date_time, device_status);
+        }
+        return payload;
+    }
+
+    /**
+     *
+     * @param device_id  设备号
+     * @param type_id  设备类型，可以用来获取设备拥有的传感器数量及类型
+     * @param date_time  故障时间
+     * @param device_status  设备状态信息，是9位的数字，类似 101000000, 第一位表示的是当前的设备状态，包含0,1,2,3,四种,0代表正常，1代表只有传感器故障，2代表数据异常，
+    后面8位的各自都有3种标识，0,1,2 分别代表正常，传感器故障，数据异常
+     */
+    public Map<String, Object> judgeErrType(String device_id, String type_id, String date_time, String device_status){
+        Map<String,Object> payload = new HashMap<>();
+        payload.put("device_id", device_id);
+        //获取所有传感器，用于判断设备含有什么传感器
+        List<Sensor> sensorList = sensorMapper.findAllSensors();
+        Type deviceType = typeMapper.findDataById(new Long(type_id));
+        if(device_status.charAt(0) == '1'){ //设备只有传感器故障 error
+            updateStates(device_id, new Integer(3) );
+            payload.put("status", "故障");
+            for(int i = 1; i < device_status.length(); i++){
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){ //当设备有某个传感器时
+                    if(device_status.charAt(i) == '1'){ //当某个传感器故障时
+                        handlerErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器故障");
+                    }
+                }
+            }
+        }else if(device_status.charAt(0) == '2'){  //设备只有数据异常 warn
+            updateStates(device_id, new Integer(4));
+            payload.put("status", "异常");
+            for(int i = 1; i < device_status.length(); i++){
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){ //当设备有某个传感器时
+                    if(device_status.charAt(i) == '2'){ //当某个传感器故障时
+                        handlerErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
+                    }
+                }
+            }
+        }else{  //设备既有传感器故障和数据异常
+            updateStates(device_id, new Integer(3)); //既有故障又有异常时，将状态改为故障优先
+            payload.put("status", "故障");
+            for(int i = 1; i < device_status.length(); i++){
+                if((deviceType.getSensor_value() & sensorList.get(i-1).getValue()) != 0){ //当设备有某个传感器时
+                    if(device_status.charAt(i) == '1'){ //当某个传感器故障时
+                        handlerErr(device_id, new Integer(3), date_time, sensorList.get(i-1).getName()+"传感器故障");
+                    } else if(device_status.charAt(i) == '2'){ //当某个传感器数据异常时
+                        handlerErr(device_id, new Integer(4), date_time, sensorList.get(i-1).getName()+"传感器数据异常");
+                    }
+                }
+
+            }
+        }
+        return payload;
+    }
+
+    /**
+     * 处理设备异常的共同方法，先插入数据库，再通过mqtt发送消息创建维修单
+     * @param device_id 设备号
+     * @param status_id 状态id, 包含1(正常), 2(离线), 3(故障), 4(异常)
+     * @param date_time 故障发生时间
+     * @param description 描述信息
+     */
+    public void handlerErr(String device_id, Integer status_id, String date_time, String description){
+        Map<String, Object> payload= new HashMap<>();
+        payload.put("device_id", device_id);
+        payload.put("status_id", status_id);
+        payload.put("create_time", date_time);
+        payload.put("description",description);
+        insertErr(payload);
+        payload.put("status_id", status_id.toString());
+        mqttService.sendToMqtt("user/Order/error",payload.toString());
+    }
+
+    /**
+     * 在数据库中插入故障设备信息
+     * @param data Map中要有device_id(String), status_id(Integer类型), date_time(String), description(String)
+     * @return
+     */
+    public Long insertErr(Map<String, Object> data) {
+        return deviceMapper.insertErrTables(data);
+    }
+
+
+
+
+
 
     //4.更新所有设备状态
     public void updateStates(){
@@ -250,14 +299,7 @@ public class DeviceInformationService {
         deviceMapper.updateErrTables();
     }
 
-    public Long insertErr(String device_id, Integer status_id, String create_time, String description){
-        Map<String, Object> data = new HashMap<>();
-        data.put("device_id", device_id);
-        data.put("status_id", status_id);
-        data.put("create_time", create_time);
-        data.put("description", description);
-        return deviceMapper.insertErrTables(data);
-    }
+
 
     //获取故障异常表的数据
     public List<ErrDevices> findErrDeviceByUserId(Integer id) {
