@@ -18,9 +18,9 @@ public class OrderService {
         return orderMapper.getOrder(status);
     }
 
-    public Map<String,Object> getOrderByDid(String did) {
+    public Map<String,Object> getOrderByDid(String device_id) {
         Map<String,Object> map = new HashMap<>();
-        List<Order> orders = orderMapper.getOrderByDid(did);
+        List<Order> orders = orderMapper.getOrderByDid(device_id);
         if(orders.isEmpty()) {
             map.put("msg","无此设备" );
             map.put("status","fail" );

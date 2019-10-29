@@ -156,7 +156,11 @@ public class DeviceInformationService {
     }
 
 
-    //修改设备状态
+    /**
+     * 修改设备状态
+     * @param device_id 设备号
+     * @param status_id 状态号
+     */
     @Async
     public void updateStates(String device_id, Integer status_id){
         Map<String,Object> data = new HashMap<>();
@@ -183,28 +187,82 @@ public class DeviceInformationService {
         deviceMapper.disconnect(device_id);
     }
 
+
     /**
      * 设备状态改变时进行处理，判断是从正常变成故障，还是从故障变成正常
-     * @param data Map里面包含device_id(String), type_id(String), date_time(String), device_status(String)
+     * @param data Map里面包含device_id(String), create_time(String), old_status(String), new_status(String), sensors(List<Map>) sensor(包含id, old_status, new_status, description)
+     * status: 1=正常 3=故障 4=异常
      * @return payload Map里面包含device_id(String), status(String)
      */
     public Map<String, Object> handlerStatus(Map<String, Object> data){
         Map<String, Object> payload = new HashMap<>();
         String device_id = (String) data.get("device_id");
-        String type_id = (String) data.get("type_id");
-        String date_time = (String) data.get("date_time");
-        String device_status = (String) data.get("device_status");
-        if(device_status.equals("000000000")){ //设备恢复正常
-            System.out.println(device_id + " is normal");
-            updateStates(device_id, new Integer(1));
-            payload.put("device_id", device_id);
+        String create_time = (String) data.get("create_time");
+        Integer status_id = (Integer) data.get("status_id");
+        List<Map<String,Object>> sensors =  (ArrayList)data.get("sensors");
+        updateStates(device_id, status_id); //修改设备的状态
+        payload.put("device_id", device_id);
+        if(status_id == 1){
             payload.put("status", "正常");
-        }else { //设备有故障或异常
-            System.out.println(device_id + " is err!");
-            payload = judgeErrType(device_id, type_id, date_time, device_status);
+        }else{
+            payload.put("status", "故障");
+        }
+        for (Map<String, Object> sensor : sensors) {
+            String old_status = (String) sensor.get("old_status");
+            String new_status = (String) sensor.get("new_status");
+            String description = (String) sensor.get("description");
+            if (new_status.equals("1")) { //传感器原本是故障的，后面正常了，要删除该传感器的故障信息
+                deleteErr(device_id,new Integer(old_status), description);
+            } else { //有新的故障信息到来
+                handlerErr(device_id,new Integer(new_status),create_time, description);
+            }
         }
         return payload;
     }
+
+    /**
+     * 处理设备异常的共同方法，先插入数据库，再通过mqtt发送消息创建维修单
+     * @param device_id 设备号
+     * @param status_id 状态id, 包含1(正常), 2(离线), 3(故障), 4(异常)
+     * @param date_time 故障发生时间
+     * @param description 描述信息
+     */
+    public void handlerErr(String device_id, Integer status_id, String date_time, String description){
+        Map<String, Object> payload= new HashMap<>();
+        payload.put("device_id", device_id);
+        payload.put("status_id", status_id);
+        payload.put("create_time", date_time);
+        payload.put("description",description);
+        insertErr(payload);
+        payload.put("status_id", status_id.toString());
+        mqttService.sendToMqtt("user/Order/error",payload.toString());
+    }
+
+    /**
+     * 在数据库中插入故障设备信息
+     * @param data Map中要有device_id(String), status_id(Integer类型), date_time(String), description(String)
+     * @return
+     */
+    public Long insertErr(Map<String, Object> data) {
+        return deviceMapper.insertErrTables(data);
+    }
+
+    /**
+     * 在数据库中删除故障设备信息
+     * @param device_id 设备号
+     * @param status_id 状态号
+     * @param description 描述信息
+     */
+    public void deleteErr(String device_id, Integer status_id, String description) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("device_id", device_id);
+        data.put("status_id", status_id);
+        data.put("description", description);
+        deviceMapper.deleteErr(data);
+    }
+
+
+
 
     /**
      *
@@ -257,37 +315,6 @@ public class DeviceInformationService {
         return payload;
     }
 
-    /**
-     * 处理设备异常的共同方法，先插入数据库，再通过mqtt发送消息创建维修单
-     * @param device_id 设备号
-     * @param status_id 状态id, 包含1(正常), 2(离线), 3(故障), 4(异常)
-     * @param date_time 故障发生时间
-     * @param description 描述信息
-     */
-    public void handlerErr(String device_id, Integer status_id, String date_time, String description){
-        Map<String, Object> payload= new HashMap<>();
-        payload.put("device_id", device_id);
-        payload.put("status_id", status_id);
-        payload.put("create_time", date_time);
-        payload.put("description",description);
-        insertErr(payload);
-        payload.put("status_id", status_id.toString());
-        mqttService.sendToMqtt("user/Order/error",payload.toString());
-    }
-
-    /**
-     * 在数据库中插入故障设备信息
-     * @param data Map中要有device_id(String), status_id(Integer类型), date_time(String), description(String)
-     * @return
-     */
-    public Long insertErr(Map<String, Object> data) {
-        return deviceMapper.insertErrTables(data);
-    }
-
-
-
-
-
 
     //4.更新所有设备状态
     public void updateStates(){
@@ -314,13 +341,6 @@ public class DeviceInformationService {
         return deviceMapper.findErr(data);
     }
 
-    public void deleteErr(String device_id, Integer status_id, String description) {
-        Map<String, Object> data = new HashMap<>();
-        data.put("device_id", device_id);
-        data.put("status_id", status_id);
-        data.put("description", description);
-        deviceMapper.deleteErr(data);
-    }
 
     //5.重置所有设备为离线状态
     public void resetOffLine(){

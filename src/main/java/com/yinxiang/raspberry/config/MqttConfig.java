@@ -254,9 +254,27 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
+                /** jsonData = {"device_id":"ba10000",
+                 "create_time":"2019-9-27 10:00:00",
+                 "status_id": 1,
+                 "sensors":[
+                 {
+                 "old_status":"3",
+                 "new_status":"1",
+                 "description":"温度传感器故障"
+                 },
+                 {
+                 "old_status":"1",
+                 "new_status":"4",
+                 "description":"水浸数据异常"
+                 },
+                 }
+                 ]}
+                 *
+                 */
                 Map<String, Object> data = jsonString2Map(jsonData);
-                //Map<String, Object> payload = deviceInformationService.handlerStatus(data);
-                //simpMessagingTemplate.convertAndSend("/topic/status", payload);
+                Map<String, Object> payload = deviceInformationService.handlerStatus(data);
+                simpMessagingTemplate.convertAndSend("/topic/status", payload);
             }
         };
     }
