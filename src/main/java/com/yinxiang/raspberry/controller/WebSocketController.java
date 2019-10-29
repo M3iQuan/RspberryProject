@@ -38,4 +38,13 @@ public class WebSocketController {
         //simpMessagingTemplate.convertAndSendToUser(principal.getName() , "/app/test" , message.getContent());
 
     }
+
+    @MessageMapping("/xiaji")
+    @SendTo("/topic/xiaji")
+    public com.yinxiang.raspberry.model.Message greeting() throws Exception {
+        com.yinxiang.raspberry.model.Message message = new com.yinxiang.raspberry.model.Message();
+        message.setContent("下机了!");
+        message.setName("超时或者挤下线");
+        return message;
+    }
 }
