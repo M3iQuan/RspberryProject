@@ -60,13 +60,14 @@ public class RoleService {
                 for (Area area:areas
                 ) {
                     Areanames.add(area.getArea_name());
+                    System.out.println("Areanames:"+area.getArea_name());
                 }
                 userRoleMapper.deleteUserAreaByUid(existUser.getId(),Areanames);
                 for(int i=0;i<areaname.length;i++) {
                     //还要判断这些areaname是不是在areas里
                     if(Areanames.contains(areaname[i])){
-
                         roleMapper.addUserArea(existUser.getId(),locationMapper.getAreaIdByAreaname(areaname[i]));
+                        System.out.println("添加userarea成功");
                     }
                 }
                 result.setMsg("添加成功");

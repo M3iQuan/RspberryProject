@@ -59,6 +59,10 @@ public class LocationController {
         return locationService.findDataByArea(area_name);
     }
 
+    @RequestMapping(value = "/area/getAllArea", method = RequestMethod.GET)
+    public List<String> getAllArea() {
+        return locationService.findAllArea();
+    }
     /*@RequestMapping(value = "/getUserArea",method = RequestMethod.GET)
     public List<Area> getArea() {
         return locationService.getUserAreaById(UserUtils.getCurrentUser().getId());

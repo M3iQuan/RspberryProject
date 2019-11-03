@@ -14,7 +14,8 @@ public class ImageCode {
     private String[] fontNames = {"宋体","楷体","隶书","微软雅黑"};
     private Color bgColor = new Color(255,255,255);
     private Random random = new Random();
-    private String codes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    //private String codes = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private String codes = "1";
     private String text;
 
     private Color randomColor() {

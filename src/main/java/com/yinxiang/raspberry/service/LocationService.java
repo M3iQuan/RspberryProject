@@ -24,7 +24,7 @@ public class LocationService {
     }
 
     //获取所有区域名，没有根据用户信息判断
-    public List<Area> findAllArea() {
+    public List<String> findAllArea() {
         return locationMapper.findAllArea();
     }
 

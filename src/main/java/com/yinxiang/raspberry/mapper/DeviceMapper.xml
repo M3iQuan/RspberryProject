@@ -8,6 +8,10 @@
         <result property="description" column="description"/>
         <result property="areaname" column="areaname"/>
         <result property="create_time" column="create_time"/>
+        <result property="type" column="name"/>
+        <result property="latitude" column="latitude"/>
+        <result property="longitude" column="longitude"/>
+        <result property="areapath" column="areapath"/>
     </resultMap>
 
     <select id="getWrongDeviceById" resultType="com.yinxiang.raspberry.model.Device" resultMap="BaseResultMap">
@@ -16,8 +20,8 @@
         where ed.device_id=da.device_id AND da.areaId=a.id AND ed.device=#{device_id}
     </select>
 
-    <select id="getDeviceByPage" resultType="com.yinxiang.raspberry.model.Device">
-        select d.id,d.latitude,d.longitude,d.description,s.name,t.name,a.areaname
+    <select id="getDeviceByPage" resultMap="BaseResultMap">
+        select d.id,d.latitude,d.longitude,d.description,t.name,a.areaname,a.areapath
         from device d,device_status ds,status s,area a,type t
         where d.id = ds.device_id AND ds.status_id = s.id AND a.aid = d.area_id AND t.id = d.type_id
         AND (d.id like concat('%',#{keywords},'%') or s.name like concat('%',#{keywords},'%')
