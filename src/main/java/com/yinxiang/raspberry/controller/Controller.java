@@ -1,6 +1,8 @@
 package com.yinxiang.raspberry.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yinxiang.raspberry.bean.Area;
+import com.yinxiang.raspberry.mapper.LocationMapper;
 import com.yinxiang.raspberry.model.*;
 import com.yinxiang.raspberry.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,9 @@ public class Controller {
 
     @Autowired
     private LocationService locationService;
+
+    @Autowired
+    private LocationMapper locationMapper;
 
 
     @PostMapping("/regis")
@@ -159,6 +164,15 @@ public class Controller {
         Map<String, Object> map = new HashMap<>();
         List<Device> deviceByPage = deviceService.getDeviceByPage(page, size,
                 keywords, id, latitude, longitude, description, statusname, type, areaname, areanames);
+        for (Device value :
+                deviceByPage) {
+            String[] path = value.getAreapath().substring(1).split("\\.");
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String p:path) {
+                stringBuilder.append(locationMapper.getAreanameByAreaid(Integer.parseInt(p)));
+            }
+            value.setAreaname(stringBuilder.toString());
+        }
         List<String> types = deviceService.getAllType();
         List<String> areas = deviceService.getAllArea();
         Long count = deviceService.getCountByKeywords(keywords, id, latitude, longitude, description, statusname, type, areaname, areanames);
@@ -234,10 +248,10 @@ public class Controller {
     public Map<String,Object> addArea(String areaname,String parentname) {
         Map<String, Object> map = new HashMap<>();
         if(locationService.addArea(areaname,parentname)==1) {
-            map.put("status","success" );
+            map.put("status","200" );
             return map;
         }
-        map.put("status","fail" );
+        map.put("status","400" );
         return map;
     }
 
@@ -245,13 +259,12 @@ public class Controller {
     public Map<String,Object> deleteDep(String areaname) {
         Map<String, Object> map = new HashMap<>();
         if (locationService.deleteArea(areaname) == 1) {
-            map.put("status", "success");
+            map.put("status", "200");
             map.put("msg","删除成功！" );
             return map;
         }
-        map.put("status", "fail");
+        map.put("status", "400");
         map.put("msg","删除失败！" );
         return map;
     }
-
 }

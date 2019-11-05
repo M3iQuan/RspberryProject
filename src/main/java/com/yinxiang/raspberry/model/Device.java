@@ -8,6 +8,7 @@ public class Device {
     private String statusname;
     private String type;
     private String areaname;
+    private String areapath;
     private Integer sensor_value;
     private String create_time;
 
@@ -81,5 +82,13 @@ public class Device {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAreapath() {
+        return areapath;
+    }
+
+    public void setAreapath(String areapath) {
+        this.areapath = areapath;
     }
 }

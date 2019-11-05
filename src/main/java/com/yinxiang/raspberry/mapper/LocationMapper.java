@@ -13,7 +13,7 @@ public interface LocationMapper {
     Location findDataById(@Param("device_id") String device_id);
 
     //获取所有区域名，没有根据用户信息判断
-    List<Area> findAllArea();
+    List<String> findAllArea();
 
     //根据用户信息，获取用户所在的区域
     List<Area> getAreaByUserId(@Param("id") Integer id );
@@ -29,6 +29,9 @@ public interface LocationMapper {
     //List<String> getUserAreaByid(@Param("id") Integer id );
 
     int getAreaIdByAreaname(@Param("areaname")String areaname);
+    String getAreanameByAreaid(@Param("areaid")int areaid);
+    //3.新增设备的GPS数据
+    //Long saveData(Location location);
 
     String getAreaNameByDevice(@Param("device_id") String device_id);
 

@@ -1,11 +1,14 @@
 package com.yinxiang.raspberry.service;
 
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
+import com.yinxiang.raspberry.bean.Area;
+import com.yinxiang.raspberry.mapper.LocationMapper;
+import com.yinxiang.raspberry.mapper.RoleMapper;
 import com.yinxiang.raspberry.mapper.UserMapper;
 import com.yinxiang.raspberry.mapper.UserRoleMapper;
 import com.yinxiang.raspberry.model.Result;
 import com.yinxiang.raspberry.model.User;
+import com.yinxiang.raspberry.model.UserUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.ArrayList;
 
 
 @Service
@@ -25,7 +29,10 @@ public class UserService implements UserDetailsService {
     UserRoleMapper userRoleMapper;
 
     @Autowired
-    RoleService roleService;
+    LocationMapper locationMapper;
+
+    @Autowired
+    RoleMapper roleMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -39,6 +46,9 @@ public class UserService implements UserDetailsService {
     }
 
     public Result register(User user,String rolename,String[] areaname) { //注册的服务
+        for(int i=0;i<areaname.length;i++) {
+            System.out.println("添加用户的areaname:"+areaname[i]);
+        }
         Result result = new Result();
         result.setSuccess(false);
         result.setDetail(null);
@@ -47,14 +57,38 @@ public class UserService implements UserDetailsService {
             if(existUser != null){
                 result.setMsg("用户名已存在");
             }else{
-                String username = user.getUsername();  //
+                String username = user.getUsername();
                 System.out.println(user);
                 String password = new BCryptPasswordEncoder().encode(username);  //
                 user.setPassword(password);//这三行是密码加密
+                System.out.println("getpassword:"+user.getPassword());
+                if(userMapper.register(user)!=0) {   //这是把用户信息添加到user表，但是角色和区域没有划分。
+                    System.out.println("添加到user成功！");
+                }
 
-                userMapper.register(user);   //这是把用户信息添加到user表，但是角色和区域没有划分。
-                if(!roleService.addRole(user,rolename,areaname).isSuccess()) {
-                    userMapper.deleteUserByName(user.getUsername());
+
+                //这下面的跟roleservice的addRole方法很像
+                if(userRoleMapper.getRidByName(rolename)==1) {
+                    if(UserUtils.getCurrentUser().getUsername().equals("super")) {
+                        userRoleMapper.addRole(userMapper.loadUserByUsername(user.getUsername()).getId(),userRoleMapper.getRidByName(rolename));
+                    }else {
+                        userMapper.deleteUserByName(user.getUsername());
+                    }
+                }else {
+                    userRoleMapper.addRole(userMapper.loadUserByUsername(user.getUsername()).getId(),userRoleMapper.getRidByName(rolename));
+                }
+
+                List<Area> areas = locationMapper.getAreaByUserId(UserUtils.getCurrentUser().getId());
+                List<String> Areanames = new ArrayList();
+                for (Area area:areas
+                ) {
+                    Areanames.add(area.getArea_name());
+                }
+                for(int i=0;i<areaname.length;i++) {
+                    if(Areanames.contains(areaname[i])){
+                        System.out.println(userMapper.loadUserByUsername(user.getUsername()).getId()+"   "+locationMapper.getAreaIdByAreaname(areaname[i]));
+                        roleMapper.addUserArea(userMapper.loadUserByUsername(user.getUsername()).getId(),locationMapper.getAreaIdByAreaname(areaname[i]));
+                    }
                 }
 
                 result.setMsg("注册成功");
@@ -63,8 +97,9 @@ public class UserService implements UserDetailsService {
                 //result.setDetail(user);
             }
         } catch (Exception e) {
+            userMapper.deleteUserByName(user.getUsername());
             result.setMsg(e.getMessage());
-            e.getMessage();
+            e.printStackTrace();
         }
         return result;
     }

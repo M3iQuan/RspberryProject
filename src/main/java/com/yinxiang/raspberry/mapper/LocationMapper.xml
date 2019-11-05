@@ -33,7 +33,7 @@
         a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id and a.id = #{device_id}
     </select>
 
-    <select id="findAllArea"  resultMap="AreaMap">
+    <select id="findAllArea" resultType="java.lang.String" >
         select
         areaname
         from
@@ -101,7 +101,7 @@
     </select>
 
     <select id="getAreaByPid" resultMap="BaseResultMap">
-        select a.* from area a where a.`parentId`=#{pid};
+        select a.* from area a where a.`parentId`=#{pid}
     </select>
 
     <select id="addArea" statementType="CALLABLE">
@@ -112,6 +112,9 @@
     </select>
     <select id="getLeafAreaByParentId" resultMap="BaseResultMap">
         select a.aid,a.areaname from area a where isparent==0 and areapath like concat('%',#{pid},'%')
+    </select>
+    <select id="getAreanameByAreaid" resultType="java.lang.String">
+        select areaname from area where aid = #{areaid}
     </select>
 
     <!--    &lt;!&ndash;3.新增设备的GPS数据&ndash;&gt;

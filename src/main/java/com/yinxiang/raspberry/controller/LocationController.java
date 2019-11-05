@@ -1,18 +1,14 @@
 package com.yinxiang.raspberry.controller;
 
 import com.yinxiang.raspberry.bean.Area;
-import com.yinxiang.raspberry.bean.DeviceInformation;
 import com.yinxiang.raspberry.bean.Location;
 import com.yinxiang.raspberry.model.UserUtils;
-import com.yinxiang.raspberry.service.DeviceInformationService;
 import com.yinxiang.raspberry.service.LocationService;
 import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Api(tags = "设备位置数据接口")
@@ -53,6 +49,11 @@ public class LocationController {
     @RequestMapping(value = "/area/location/{area_name}", method = RequestMethod.GET)
     public List<Location> findDataByArea(@PathVariable("area_name") String area_name) {
         return locationService.findDataByArea(area_name);
+    }
+
+    @RequestMapping(value = "/area/getAllArea", method = RequestMethod.GET)
+    public List<String> getAllArea() {
+        return locationService.findAllArea();
     }
 
 }
