@@ -1,82 +1,129 @@
 package com.yinxiang.raspberry.bean;
 
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
+
+import java.time.Instant;
+
+@Measurement(name = "protector", database = "intellControl")
 public class AutoReclosingPowerProtector {
+
     /**
      * 设备号
      */
+    @Column(name = "device_id", tag = true)
     private String device_id;
+
     /**
-     * 创建时间 YY:MM:dd HH:mm:ss
+     * 区域号
      */
-    private String create_time;
+    @Column(name = "area_id", tag = true)
+    private String area_id;
+
+    /**
+     * 时间戳  YY:MM:dd HH:mm:ss
+     */
+    @Column(name = "time")
+    private Instant time;
+
     /**
      * 分/合闸状态
      */
+    @Column(name = "Sta_H")
     private String Sta_H;
+
     /**
      * 分闸故障原因
      */
+    @Column(name = "Sta_L")
     private Long Sta_L;
+
     /**
      * 实时电压 V
      */
+    @Column(name = "U")
     private Long U;
+
     /**
      * 实时电流 0.1A
      */
+    @Column(name = "I")
     private Long I;
+
     /**
      * 实时漏电流 mA
      */
+    @Column(name = "Iz")
     private Long Iz;
+
     /**
      * 额定电流 0.1A
      */
+    @Column(name = "Ie")
     private Long Ie;
+
     /**
      * 过压动作值 V
      */
+    @Column(name = "Uov")
     private Long Uov;
+
     /**
      * 欠压动作值 V
      */
+    @Column(name = "Ulv")
     private Long Ulv;
+
     /**
      * 漏电动作值 mA
      */
+    @Column(name = "Izset")
     private Long Izset;
+
     /**
      * 过流出现次数
      */
+    @Column(name = "CurErrCnt")
     private Long CurErrCnt;
+
     /**
      * 漏电出现次数
      */
+    @Column(name = "LKErrCnt")
     private Long LKErrCnt;
+
     /**
      * 欠压出现次数
      */
+    @Column(name = "VlErrCnt")
     private Long VlErrCnt;
+
     /**
      * 过压出现次数
      */
+    @Column(name = "VhErrCnt")
     private Long VhErrCnt;
+
     /**
      * 断电出现次数
      */
+    @Column(name = "VOffCnt")
     private Long VOffCnt;
+
     /**
      * 设备地址
      */
+    @Column(name = "Addr")
     private Long Addr;
+
     /**
      * 打开/关闭设备
      */
+    @Column(name = "VON_OFF")
     private Long VON_OFF;
 
     public AutoReclosingPowerProtector() {
     }
-
 
     public String getDevice_id() {
         return device_id;
@@ -86,12 +133,20 @@ public class AutoReclosingPowerProtector {
         this.device_id = device_id;
     }
 
-    public String getCreate_time() {
-        return create_time;
+    public String getArea_id() {
+        return area_id;
     }
 
-    public void setCreate_time(String create_time) {
-        this.create_time = create_time;
+    public void setArea_id(String area_id) {
+        this.area_id = area_id;
+    }
+
+    public Instant getTime() {
+        return time;
+    }
+
+    public void setTime(Instant time) {
+        this.time = time;
     }
 
     public String getSta_H() {
@@ -220,5 +275,30 @@ public class AutoReclosingPowerProtector {
 
     public void setVON_OFF(Long VON_OFF) {
         this.VON_OFF = VON_OFF;
+    }
+
+    @Override
+    public String toString() {
+        return "AutoReclosingPowerProtector{" +
+                "device_id='" + device_id + '\'' +
+                ", area_id='" + area_id + '\'' +
+                ", time=" + time +
+                ", Sta_H='" + Sta_H + '\'' +
+                ", Sta_L=" + Sta_L +
+                ", U=" + U +
+                ", I=" + I +
+                ", Iz=" + Iz +
+                ", Ie=" + Ie +
+                ", Uov=" + Uov +
+                ", Ulv=" + Ulv +
+                ", Izset=" + Izset +
+                ", CurErrCnt=" + CurErrCnt +
+                ", LKErrCnt=" + LKErrCnt +
+                ", VlErrCnt=" + VlErrCnt +
+                ", VhErrCnt=" + VhErrCnt +
+                ", VOffCnt=" + VOffCnt +
+                ", Addr=" + Addr +
+                ", VON_OFF=" + VON_OFF +
+                '}';
     }
 }

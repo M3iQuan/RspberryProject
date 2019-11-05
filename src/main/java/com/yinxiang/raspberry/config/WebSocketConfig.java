@@ -23,10 +23,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
          *    调度器我们可以自己写一个，也可以自己使用默认的调度器 new DefaultManagedTaskScheduler()
          */
         //配置消息的前缀,如果匹配则转发到broker,再由broker广播到当前连接的客户端,broker可以把消息广播
-        config.enableSimpleBroker("/topic");
+        //广播消息要发到/topic下，而发送到特定用户要发到/queue下
+        config.enableSimpleBroker("/topic","/queue");
         //接收消息的前缀
         config.setApplicationDestinationPrefixes("/app");
-        config.setUserDestinationPrefix("/user");
+        //config.setUserDestinationPrefix("/user");
     }
 
     @Override

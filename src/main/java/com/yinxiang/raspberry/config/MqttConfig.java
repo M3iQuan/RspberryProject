@@ -1,7 +1,8 @@
 package com.yinxiang.raspberry.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yinxiang.raspberry.bean.Test;
+import com.yinxiang.raspberry.Utils.InfluxDbUtils;
+import com.yinxiang.raspberry.Utils.MessageUtils;
 import com.yinxiang.raspberry.service.*;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,15 +23,10 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 @EnableAsync
 @Configuration
@@ -55,8 +51,8 @@ public class MqttConfig {
     private String sendTopic;
 
     //用于接收设备发送过来的topic
-    @Value("${spring.mqtt.server.topic}")
-    private String onlineTopic;
+    //@Value("${spring.mqtt.server.topic}")
+    //private String onlineTopic;
 
     private String connectedTopic = "$SYS/brokers/emqx@127.0.0.1/clients/+/connected";
     private String disconnectedTopic = "$SYS/brokers/emqx@127.0.0.1/clients/+/disconnected";
@@ -65,6 +61,7 @@ public class MqttConfig {
     private String water_statusTopic = "/device/data/water";
     private String air_lightTopic = "/device/data/air_light";
     private String protectorTopic = "/device/data/protector";
+    private String orderTopic = "/user/order/status";
 
 
     @Autowired
@@ -80,8 +77,7 @@ public class MqttConfig {
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
     @Autowired
-    Test test;
-
+    private InfluxDbUtils influxDbUtils;
     /**
      * 订阅的bean名称
      */
@@ -107,8 +103,8 @@ public class MqttConfig {
         mqttConnectOptions.setServerURIs(new String[]{hostUrl});
         // 设置超时时间 单位为秒
         mqttConnectOptions.setConnectionTimeout(30);
-        // 设置会话心跳时间 单位为秒 服务器会每隔1.5*20秒的时间向客户端发送心跳判断客户端是否在线，但这个方法并没有重连的机制
-        mqttConnectOptions.setKeepAliveInterval(2);
+        // 设置会话心跳时间 单位为秒 服务器会每隔60秒的时间向客户端发送心跳判断客户端是否在线，但这个方法并没有重连的机制
+        mqttConnectOptions.setKeepAliveInterval(60);
         return mqttConnectOptions;
     }
 
@@ -190,6 +186,8 @@ public class MqttConfig {
      * MQTT消息处理器(用于接收消息)
      * @return MessageHandler
      */
+
+
     //处理函数
     public static Map<String,Object> jsonString2Map(String content){
         ObjectMapper mapper = new ObjectMapper();
@@ -211,7 +209,8 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
+                //Map<String, Object> data = jsonString2Map(jsonData);
                 String device_id = (String)data.get("username");
                 if(!"admin".equals(device_id)) {
                     System.out.println("device: " + device_id + " is connected!") ;
@@ -232,7 +231,7 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
                 String device_id = (String)data.get("username");
                 if(!"admin".equals(device_id)) {
                     System.out.println("device: " + device_id + " is disconnected!") ;
@@ -254,6 +253,8 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
+                String receiveTopic = message.getHeaders().get("mqtt_receivedTopic").toString();
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
                 /** jsonData = {"device_id":"ba10000",
                  "create_time":"2019-9-27 10:00:00",
                  "status_id": 1,
@@ -267,20 +268,23 @@ public class MqttConfig {
                  "old_status":"1",
                  "new_status":"4",
                  "description":"水浸数据异常"
-                 },
-                 }
-                 ]}
+                 }]}
+
                  *
                  */
-                Map<String, Object> data = jsonString2Map(jsonData);
-                Map<String, Object> payload = deviceInformationService.handlerStatus(data);
-                simpMessagingTemplate.convertAndSend("/topic/status", payload);
+                if (receiveTopic.equals(statusTopic)) { //进行状态的处理
+                    Map<String, Object> payload = deviceInformationService.handlerStatus(data);
+                    simpMessagingTemplate.convertAndSend("/topic/status", payload);
+                } else if (receiveTopic.equals(orderTopic)) {
+                    //订单状态发生改变时，要做的操作...
+                    deviceInformationService.handleOrder(data);
+                }
             }
         };
     }
 
 
-
+    //temperature_and_humidity
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataOne")
     public MessageHandler handlerDataOne() {
@@ -288,12 +292,12 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
-                test.getTemperature_and_humidity_data().add(data);
-                //tempAndHumService.saveData(data);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
+                influxDbUtils.getInfluxDB().write(tempAndHumService.constructPoint(data));
             }
         };
     }
+    //air_light
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataTwo")
     public MessageHandler handlerDataTwo() {
@@ -301,12 +305,12 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
-                test.getAir_light_data().add(data);
-                //airLightService.saveData(data);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
+                influxDbUtils.getInfluxDB().write(airLightService.constructPoint(data));
             }
         };
     }
+    //water_status
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataThree")
     public MessageHandler handlerDataThree() {
@@ -314,12 +318,13 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
-                test.getWater_data().add(data);
-                //waterService.saveData(data);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
+                //直接调用write()方法, 后台自动批处理插入
+                influxDbUtils.getInfluxDB().write(waterService.constructPoint(data));
             }
         };
     }
+    //protector
     @Bean
     @ServiceActivator(inputChannel = "mqttInboundChannelDataFour")
     public MessageHandler handlerDataFour() {
@@ -327,9 +332,8 @@ public class MqttConfig {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 String jsonData = message.getPayload().toString();
-                Map<String, Object> data = jsonString2Map(jsonData);
-                test.getProtector_data().add(data);
-                //autoReclosingPowerProtectorService.saveData(data);
+                Map<String, Object> data = MessageUtils.jsonString2Map(jsonData);
+                influxDbUtils.getInfluxDB().write(autoReclosingPowerProtectorService.constructPoint(data));
             }
         };
     }
@@ -341,7 +345,6 @@ public class MqttConfig {
      * MQTT消息订阅绑定
      * @return MessageProducer
      */
-
     //在线
     @Bean
     public MessageProducer inboundOnLine(){
@@ -366,12 +369,12 @@ public class MqttConfig {
         adapter.setOutputChannel(mqttInboundChannelOffLine());
         return adapter;
     }
-    //状态变化
+    //状态变化,包括订单信息
     @Bean
     public MessageProducer inboundStatus(){
         String id = serverId + "_status";
         MqttPahoMessageDrivenChannelAdapter adapter = new MqttPahoMessageDrivenChannelAdapter(
-                id, mqttPahoClientFactory(), statusTopic);
+                id, mqttPahoClientFactory(), statusTopic,orderTopic);
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

@@ -50,4 +50,5 @@ public class DeviceService {
         return deviceMapper.deleteDevice(device_id);
     }
 
+
 }

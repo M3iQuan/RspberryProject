@@ -59,6 +59,7 @@ public class LocationService {
         locationMapper.addArea(area);
         return area.getResult();
     }
+
     public int deleteArea(String areaname) {
         Area area = new Area();
         area.setId(locationMapper.getAreaIdByAreaname(areaname));
@@ -66,18 +67,21 @@ public class LocationService {
         return area.getResult();
     }
 
-    //3.新增设备GPS数据
-    /*public Long saveData(Location location) {
-        return locationMapper.saveData(location);
-    }*/
+    /**
+     * 获取用户管理的所有区域ID
+     * @param id 用户ID
+     * @return
+     */
+    public List<String> getAreaIdByUserId(Integer id) {
+        return locationMapper.getAreaIdByUserId(id);
+    }
 
-    //4.修改设备GPS数据
-    /*public Long modifyData(Location location) {
-        return locationMapper.modifyData(location);
-    }*/
-
-    //5.删除设备GPS数据
-    /*public Long deleteData(String device_id) {
-        return locationMapper.deleteData(device_id);
-    }*/
+    /**
+     * 获取设备所在区域的名字
+     * @param device_id 设备号
+     * @return
+     */
+    public String getAreaNameByDevice(String device_id) {
+        return locationMapper.getAreaNameByDevice(device_id);
+    }
 }

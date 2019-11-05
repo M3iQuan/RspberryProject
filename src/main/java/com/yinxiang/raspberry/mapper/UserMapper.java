@@ -27,5 +27,5 @@ public interface UserMapper {
 
     int updateUser(@Param("user") User user);
 
-
+    List<String> findAllUserByDeviceId(@Param("device_id") String device_id);
 }

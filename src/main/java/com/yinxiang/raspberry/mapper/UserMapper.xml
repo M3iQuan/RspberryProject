@@ -126,6 +126,12 @@
         where username = #{user.username,jdbcType=VARCHAR}
     </update>
 
-
+    <select id="findAllUserByDeviceId" parameterType="java.lang.String" resultType="java.lang.String">
+         select u.username
+         from
+         user_area ua, device d, user u
+         where
+         ua.area_id = d.area_id and u.id = ua.user_id and d.id = #{device_id}
+    </select>
 
 </mapper>

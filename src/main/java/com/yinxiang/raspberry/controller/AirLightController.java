@@ -4,7 +4,11 @@ import com.yinxiang.raspberry.bean.*;
 import com.yinxiang.raspberry.mapper.LocationMapper;
 import com.yinxiang.raspberry.model.UserUtils;
 import com.yinxiang.raspberry.service.AirLightService;
+import com.yinxiang.raspberry.service.LocationService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,26 +20,80 @@ import java.util.Map;
 @Api(tags = "空气光照接口")
 public class AirLightController {
     @Autowired
-    LocationMapper locationMapper;
+    LocationService locationService;
     @Autowired
     AirLightService airLightService;
 
-    //根据用户所在的区域，获取该区域内所有设备的信息，并且实现高级搜索以及分页
-    @RequestMapping(value = "/device/airLight/latest", method = RequestMethod.POST)
-    public Map<String,Object> findAllLatestDataByPage(@RequestBody  Map<String, Object> data) {
-        data.put("user_id", UserUtils.getCurrentUser().getId());
-        Map<String, Object> result = new HashMap<>();
-        result.put("result", airLightService.findAllLatestDataByPage(data));
-        result.put("count", airLightService.findAllCountLatest(data));
-        return result;
+    /**1
+     * 获取单个设备的历史空气光照数据数目
+     * @param device_id 设备号
+     * @return
+     */
+    @ApiOperation(value = "获取单个设备的历史空气光照数据数目", notes = "获取单个设备的历史空气光照数据数目")
+    @ApiImplicitParam(paramType = "path", name = "device_id", value = "设备id", required = true)
+    @RequestMapping(value = "/device/air_light/count/{device_id}", method = RequestMethod.GET)
+    public Long findCountById(@PathVariable("device_id") String device_id) {
+        return airLightService.findCountById(device_id);
     }
 
-    //根据设备号进行单设备历史数据的高级搜索，并且分页
-    @RequestMapping(value = "/device/airLight/query", method = RequestMethod.POST)
-    public Map<String,Object> Query(@RequestBody Map<String, Object> data){
-        Map<String, Object> result = new HashMap<>();
-        result.put("result", airLightService.queryOnCondition(data));
-        result.put("count", airLightService.findAllCount(data));
-        return result;
+
+    /**2
+     * 获取单个设备的历史空气光照数据并且可分页, 同时支持搜索
+     * @param data Map<String, Object> {"device_id":"", "pageSize":"", "currentPage":"", "queryString":[{"name":"", "value":""},{"name":"", "value1":"", "value2":""},{}]}
+     * @return
+     */
+    @ApiOperation(value = "获取单个设备的历史空气光照数据并且可分页, 同时支持搜索", notes = "获取单个设备的历史空气光照数据并且可分页, 同时支持搜索")
+    @RequestMapping(value = "/device/air_light/query", method = RequestMethod.POST)
+    public Map<String, Object> Query(@RequestBody Map<String, Object> data) {
+        return airLightService.findDataByIdAndPage(data);
     }
+
+
+    /**3
+     * 获取用户所在区域的所有设备的最新空气光照数据数目
+     * @return
+     */
+    @ApiOperation(value = "获取用户所在区域的所有设备的最新空气光照数据数目", notes = "获取用户所在区域的所有设备的最新空气光照数据数目")
+    @RequestMapping(value = "/device/air_light/latest/count", method = RequestMethod.GET)
+    public Long findAllCountLatest() {
+        return airLightService.findAllCountLatest(locationService.getAreaIdByUserId(UserUtils.getCurrentUser().getId()));
+    }
+
+
+    /**4
+     * 获取用户所在区域的所有设备的最新重合闸数据并且分页，同时支持搜索
+     * @param data Map<String, Object> {"device_id":"", "pageSize":"", "currentPage":"", "queryString":[{"name":"", "value":""},{"name":"", "value1":"", "value2":""},{}]}
+     * @return
+     */
+    @ApiOperation(value = "获取所有设备的最新空气光照数据并且分页", notes = "获取所有设备的最新空气光照数据")
+    @ApiImplicitParams({@ApiImplicitParam(paramType = "path", name = "pageSize", value = "页面记录数目", required = true), @ApiImplicitParam(paramType = "path", name = "currentPage", value = "当前页面", required = true)})
+    @RequestMapping(value = "/device/air_light/latest", method = RequestMethod.POST)
+    public Map<String, Object> findAllLatestDataByPage(@RequestBody Map<String, Object> data) {
+        return airLightService.findAllLatestDataByPage(data, locationService.getAreaIdByUserId(UserUtils.getCurrentUser().getId()));
+    }
+
+
+    /**5
+     * 获取单个设备的最新空气光照数据
+     * @param device_id 设备号
+     * @return
+     */
+    @ApiOperation(value = "获取单个设备的最新空气光照数据", notes = "获取单个设备的最新空气光照数据")
+    @ApiImplicitParam(paramType = "path", name = "device_id", value = "设备id", required = true)
+    @RequestMapping(value = "/device/air_light/latest/{device_id}", method = RequestMethod.GET)
+    public List<AirLight> findLatestDataById(@PathVariable(value = "device_id") String device_id) {
+        return airLightService.findLatestDataById(device_id);
+    }
+
+
+    /**6
+     * 获取所有设备的历史空气光照数据数目
+     * @return
+     */
+    @ApiOperation(value = "获取所有设备的历史空气光照数据数目", notes = "获取所有设备的历史空气光照数据数目")
+    @RequestMapping(value = "/device/air_light/count", method = RequestMethod.GET)
+    public Long findAllCount() {
+        return airLightService.findAllCount();
+    }
+
 }

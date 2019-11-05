@@ -3,12 +3,8 @@ package com.yinxiang.raspberry.bean;
 import org.influxdb.annotation.Column;
 import org.influxdb.annotation.Measurement;
 
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-
 @Measurement(name = "temp", database = "intellControl")
-public class TempAndHum {
-
+public class ControlFan {
     /**
      * 设备号
      */
@@ -20,24 +16,6 @@ public class TempAndHum {
      */
     @Column(name = "area_id", tag = true)
     private String area_id;
-
-    /**
-     * 时间戳  YY:MM:dd HH:mm:ss
-     */
-    @Column(name = "time")
-    private Instant time;
-
-    /**
-     * 温度 ℃
-     */
-    @Column(name = "temperature")
-    private Double temperature;
-
-    /**
-     * 湿度 %
-     */
-    @Column(name = "humidity")
-    private Double humidity;
 
     /**
      * 风扇状态 0=关闭 1=打开
@@ -57,7 +35,7 @@ public class TempAndHum {
     @Column(name = "auto_flag")
     private Long auto_flag;
 
-    public TempAndHum() {
+    public ControlFan() {
     }
 
     public String getDevice_id() {
@@ -74,30 +52,6 @@ public class TempAndHum {
 
     public void setArea_id(String area_id) {
         this.area_id = area_id;
-    }
-
-    public Instant getTime() {
-        return time;
-    }
-
-    public void setTime(Instant time) {
-        this.time = time;
-    }
-
-    public Double getTemperature() {
-        return temperature;
-    }
-
-    public void setTemperature(Double temperature) {
-        this.temperature = temperature;
-    }
-
-    public Double getHumidity() {
-        return humidity;
-    }
-
-    public void setHumidity(Double humidity) {
-        this.humidity = humidity;
     }
 
     public Long getFan_state() {
@@ -126,12 +80,9 @@ public class TempAndHum {
 
     @Override
     public String toString() {
-        return "TempAndHum{" +
+        return "ControlFan{" +
                 "device_id='" + device_id + '\'' +
                 ", area_id='" + area_id + '\'' +
-                ", time=" + time +
-                ", temperature=" + temperature +
-                ", humidity=" + humidity +
                 ", fan_state=" + fan_state +
                 ", fan_speed=" + fan_speed +
                 ", auto_flag=" + auto_flag +

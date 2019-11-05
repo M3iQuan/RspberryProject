@@ -1,28 +1,47 @@
 package com.yinxiang.raspberry.bean;
 
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
+
+import java.time.Instant;
+
+@Measurement(name = "air_light", database = "intellControl")
 public class AirLight {
+
     /**
      * 设备号
      */
+    @Column(name = "device_id", tag = true)
     private String device_id;
-    /**
-     * 创建时间  YY:MM:dd HH:mm:ss
-     */
-    private String create_time;
 
     /**
-     * 光照强度
+     * 区域号
      */
+    @Column(name = "area_id", tag = true)
+    private String area_id;
+
+    /**
+     * 时间戳  YY:MM:dd HH:mm:ss
+     */
+    @Column(name = "time")
+    private Instant time;
+
+    /**
+     * 光照强度 lux
+     */
+    @Column(name = "luminance")
     private Long luminance;
 
     /**
-     * pm2.5
+     * pm2.5 ug/m3
      */
+    @Column(name = "pm2_5")
     private Long pm2_5;
 
     /**
-     * pm10
+     * pm10 ug/m3
      */
+    @Column(name = "pm10")
     private Long pm10;
 
     public AirLight() {
@@ -36,12 +55,20 @@ public class AirLight {
         this.device_id = device_id;
     }
 
-    public String getCreate_time() {
-        return create_time;
+    public Instant getTime() {
+        return time;
     }
 
-    public void setCreate_time(String create_time) {
-        this.create_time = create_time;
+    public void setTime(Instant time) {
+        this.time = time;
+    }
+
+    public String getArea_id() {
+        return area_id;
+    }
+
+    public void setArea_id(String area_id) {
+        this.area_id = area_id;
     }
 
     public Long getLuminance() {
@@ -66,5 +93,16 @@ public class AirLight {
 
     public void setPm10(Long pm10) {
         this.pm10 = pm10;
+    }
+
+    @Override
+    public String toString() {
+        return "AirLight{" +
+                "device_id='" + device_id + '\'' +
+                ", time=" + time +
+                ", luminance=" + luminance +
+                ", pm2_5=" + pm2_5 +
+                ", pm10=" + pm10 +
+                '}';
     }
 }

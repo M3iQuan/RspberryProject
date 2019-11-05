@@ -5,8 +5,8 @@ import org.influxdb.annotation.Measurement;
 
 import java.time.Instant;
 
-@Measurement(name = "water_status", database = "intellControl")
-public class Water {
+@Measurement(name = "protector", database = "intellControl")
+public class ControlProtector {
     /**
      * 设备号
      */
@@ -20,18 +20,12 @@ public class Water {
     private String area_id;
 
     /**
-     * 时间戳  YY:MM:dd HH:mm:ss
+     * 分/合闸状态
      */
-    @Column(name = "time")
-    private Instant time;
+    @Column(name = "Sta_H")
+    private String Sta_H;
 
-    /**
-     * 水浸状态：正常/报警
-     */
-    @Column(name = "status")
-    private String status;
-
-    public Water() {
+    public ControlProtector() {
     }
 
     public String getDevice_id() {
@@ -50,29 +44,20 @@ public class Water {
         this.area_id = area_id;
     }
 
-    public Instant getTime() {
-        return time;
+    public String getSta_H() {
+        return Sta_H;
     }
 
-    public void setTime(Instant time) {
-        this.time = time;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
+    public void setSta_H(String sta_H) {
+        Sta_H = sta_H;
     }
 
     @Override
     public String toString() {
-        return "Water{" +
+        return "ControlProtector{" +
                 "device_id='" + device_id + '\'' +
                 ", area_id='" + area_id + '\'' +
-                ", time=" + time +
-                ", status='" + status + '\'' +
+                ", Sta_H='" + Sta_H + '\'' +
                 '}';
     }
 }

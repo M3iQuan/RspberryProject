@@ -1,10 +1,12 @@
 package com.yinxiang.raspberry.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
-import com.yinxiang.raspberry.bean.Location;
+import com.yinxiang.raspberry.Utils.InfluxDbUtils;
 import com.yinxiang.raspberry.bean.Water;
-import com.yinxiang.raspberry.mapper.WaterMapper;
+import org.influxdb.dto.BoundParameterQuery;
+import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
+import org.influxdb.impl.InfluxDBResultMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,104 +14,146 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
 public class WaterService {
     @Autowired
-    WaterMapper waterMapper;
-    @Autowired
-    DeviceService deviceService;
-    @Autowired
-    MqttService mqttService;
-    @Autowired
-    LocationService locationService;
-    //1.获取单个设备的历史水浸数据数目
-    public Long findCountById(String device_id) {
-        return waterMapper.findCountById(device_id);
+    InfluxDbUtils influxDbUtils;
+    private String table = "water_status";
+
+
+    /**1
+     * 通过Map构造数据点Point
+     * @param data Map中包含所需的数据
+     * @return
+     */
+    public Point constructPoint(Map<String, Object> data) {
+        return Point.measurement(table)//指定表
+                .tag("device_id", (String) data.get("device_id")) //设备号增加索引
+                .tag("area_id", (String) data.get("area_id")) //区域号增加索引
+                .addField("status", (String) data.get("status")) //水浸状态
+                .time(Long.parseLong((String) data.get("create_time")), TimeUnit.SECONDS) //时间
+                .build();
     }
 
-    //2.获取所有设备的历史水浸数据数目
-    public Long findAllCount() {
-        return waterMapper.findAllCount();
+
+    /**2
+     * 通过对象构造数据点Point
+     * @param water
+     * @return
+     */
+    public Point constructPoint(Water water) {
+        return Point.measurementByPOJO(water.getClass())
+                .addFieldsFromPOJO(water)
+                .build();
     }
 
-    //3.获取所有设备的最新温水浸数据数目
-    public Long findAllCountLatest() {
-        return waterMapper.findAllCountLatest();
+
+    /**3
+     * 获取单个设备的历史水浸数据数目
+     * @param device_id
+     * @return Long
+     */
+    public Long findCountById(String device_id){
+        Query query = BoundParameterQuery.QueryBuilder.newQuery("SELECT * from " + table + " where device_id = $did order by time desc ")
+                .forDatabase(influxDbUtils.getDatabase())
+                .bind("did", device_id)
+                .create();
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
+        return new Long(resultMapper.toPOJO(result, Water.class).size());
     }
 
-    //4.获取单个设备的历史水浸数据并且可分页
+
+    /**4
+     * 获取单个设备的历史水浸数据并且可分页
+     * @param device_id 设备号
+     * @param pageSize 页面大小
+     * @param currentPage 当前页面
+     * @return
+     */
     public List<Water> findDataByIdAndPage(String device_id, Integer pageSize, Integer currentPage){
-        Map<String, Object> data = new HashMap<>();
-        data.put("device_id", device_id);
-        data.put("pageSize", pageSize);
-        data.put("currentPage", (currentPage - 1) * pageSize);
-        return waterMapper.findDataByIdAndPage(data);
+        Query query = BoundParameterQuery.QueryBuilder.newQuery("SELECT * from " + table + " where device_id = $did order by time desc limit " + pageSize + " offset " + (currentPage-1)*pageSize)
+                .forDatabase(influxDbUtils.getDatabase())
+                .bind("did", device_id)
+                .create();
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
+        return resultMapper.toPOJO(result, Water.class);
     }
 
-    //5.获取单个设备的最新水浸数据
-    public Water findLatestDataById(String device_id){
-        return waterMapper.findLatestDataById(device_id);
-    }
 
-    //6.获取所有设备的历史水浸数据并且分页
-    public List<Water> findAllDataByPage(Integer pageSize, Integer currentPage){
-        Map<String, Object> data = new HashMap<>();
-        data.put("pageSize", pageSize);
-        data.put("currentPage", (currentPage - 1) * pageSize);
-        return waterMapper.findAllDataByPage(data);
-    }
-
-    //7.获取所有设备的最新水浸数据并且分页
-    public List<Water> findAllLatestDataByPage(Integer pageSize, Integer currentPage){
-        Map<String, Object> data = new HashMap<>();
-        data.put("pageSize", pageSize);
-        data.put("currentPage", (currentPage - 1) * pageSize);
-        return waterMapper.findAllLatestDataByPage(data);
-    }
-
-    //8.新增设备的水浸数据
-   /* public Long saveData(Water water) {
-        if("报警".equals(water.getStatus())){
-            deviceInformationService.updateStates(water.getDevice_id(),new Integer(3));
-            Long errNum = deviceInformationService.findErrNum(water.getDevice_id(), 3, "水浸状态异常");
-            if(errNum == 0){
-                deviceInformationService.insertErr(water.getDevice_id(),3,water.getCreate_time(),"水浸状态异常");
-                String payload = "{\"device_id\":\""+water.getDevice_id()+"\", \"status_id\":3, \"create_time\":\""+water.getCreate_time()+"\", \"description\":\"水浸状态异常\"}";
-                Location location= locationService.findDataById(water.getDevice_id());
-                String area = location.getArea();
-                if(area.equals("南山区")) {
-                    mqttService.sendToMqtt("user/error/ns",payload);
-                }else if(area.equals("福田区")) {
-                    mqttService.sendToMqtt("user/error/ft",payload);
-                }else if(area.equals("宝安区")) {
-                    mqttService.sendToMqtt("user/error/ba",payload);
-                }else {
-                    mqttService.sendToMqtt("user/error/lh",payload);
-                }
-            }
-        }else{
-            Long errNum = deviceInformationService.findErrNum(water.getDevice_id(), 3, "水浸状态异常");
-            if(errNum != 0){
-                deviceInformationService.deleteErr(water.getDevice_id(), 3, "水浸状态异常");
-            }
+    /**5
+     * 获取所有设备的历史水浸数据数目, 可以用来统计数据库中有多少数据
+     * @return Long
+     */
+    public Long findAllCount(){
+        Long count = 0L;
+        Query query = BoundParameterQuery.QueryBuilder.newQuery("SELECT COUNT(status) from " + table)
+                .forDatabase(influxDbUtils.getDatabase())
+                .create();
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        try{
+            count = (long)Double.parseDouble(result.getResults().get(0).getSeries().get(0).getValues().get(0).get(1).toString());
+        }catch (Exception e){}
+        finally {
+            return count;
         }
-        return waterMapper.saveData(water);
-    }*/
-    public Long saveData(Map<String, Object> data) {
-        return waterMapper.saveData(data);
     }
 
-    //9.修改设备的水浸数据
-    public Long modifyData(Water water) {
-        return waterMapper.modifyData(water);
+
+    /**6
+     * @param area_ids 查找的所有区域
+     * 获取所有设备的最新水浸数据数目
+     * @return
+     */
+    public Long findAllCountLatest(List<String> area_ids){
+        StringBuilder sql = new StringBuilder();
+        sql.append("area_id='" + area_ids.get(0) + "'");
+        for (int i = 1; i < area_ids.size(); i++) {
+            sql.append(" or area_id='" + area_ids.get(i) + "'");
+        }
+        Query query = new Query("SELECT * from " + table + " where " + sql.toString() + " group by device_id order by time desc limit 1");
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        return new Long(result.getResults().get(0).getSeries().size());
     }
 
-    //10.删除设备的水浸数据
-    public Long deleteData(String device_id) {
-        return waterMapper.deleteData(device_id);
+
+    /**7
+     * 获取所有设备的最新水浸数据并且分页
+     * @param area_ids 查询所在区域的地方
+     * @param pageSize 页面大小
+     * @param currentPage 页面号
+     * @return
+     */
+    public List<Water> findAllLatestDataByPage(List<String> area_ids, Integer pageSize, Integer currentPage){
+        StringBuilder sql = new StringBuilder();
+        sql.append("area_id='" + area_ids.get(0) + "'");
+        for (int i = 1; i < area_ids.size(); i++) {
+            sql.append(" or area_id='" + area_ids.get(i) + "'");
+        }
+        Query query = new Query("SELECT * from " + table + " where " + sql.toString() + " group by device_id order by time desc limit 1");
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
+        return resultMapper.toPOJO(result, Water.class).subList((currentPage - 1) * pageSize, currentPage * pageSize); //from 从0开始， to 是不包含的
     }
 
+
+    /**8
+     * 获取单个设备的最新水浸数据
+     * @param device_id 设备号
+     * @return
+     */
+    public List<Water> findLatestDataById(String device_id){
+        Query query = BoundParameterQuery.QueryBuilder.newQuery("SELECT * from " + table + " where device_id = $did order by time desc limit 1")
+                .forDatabase(influxDbUtils.getDatabase())
+                .bind("did", device_id)
+                .create();
+        QueryResult result = influxDbUtils.getInfluxDB().query(query);
+        InfluxDBResultMapper resultMapper = new InfluxDBResultMapper();
+        return resultMapper.toPOJO(result, Water.class);
+    }
 
 }
