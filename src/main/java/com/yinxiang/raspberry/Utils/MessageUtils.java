@@ -3,6 +3,10 @@ package com.yinxiang.raspberry.Utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,5 +28,39 @@ public class MessageUtils {
             e.printStackTrace();
         }
         return  data;
+    }
+
+    /**
+     * 将map转成Json字符串
+     * @param data Map<String,Object>
+     * @return
+     */
+    public static String Map2jsonString(Map<String, Object> data) {
+        ObjectMapper mapper = new ObjectMapper();
+        String result = "";
+        try{
+            result =  mapper.writeValueAsString(data);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    /**
+     * 将时间格式yyyy-MM-dd HH:mm:ss
+     * @param time
+     * @return
+     */
+    public static String date2Stamp(String time) {
+        String result = "";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = simpleDateFormat.parse(time);
+            result = String.valueOf(date.getTime());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return result;
     }
 }

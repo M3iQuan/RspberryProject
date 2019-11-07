@@ -16,6 +16,7 @@ public interface LocationMapper {
     List<String> findAllArea();
 
     //根据用户信息，获取用户所在的区域
+    List<Integer> getAreaByUser(@Param("id") Integer id );
     List<Area> getAreaByUserId(@Param("id") Integer id );
 
     //根据用户信息，获取用户所在区域的所有设备信息

@@ -29,6 +29,10 @@ public class LocationService {
     }
 
     //根据用户信息，获取用户所在的区域
+    public List<Integer> getAreaByUser(Integer id) {
+        return locationMapper.getAreaByUser(id);
+    }
+
     public List<Area> getAreaByUserId(Integer id) {
         return locationMapper.getAreaByUserId(id);
     }

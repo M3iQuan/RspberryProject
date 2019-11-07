@@ -3,6 +3,7 @@ package com.yinxiang.raspberry.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yinxiang.raspberry.Utils.InfluxDbUtils;
+import com.yinxiang.raspberry.Utils.MessageUtils;
 import com.yinxiang.raspberry.bean.*;
 import com.yinxiang.raspberry.mapper.*;
 import com.yinxiang.raspberry.model.UserUtils;
@@ -246,12 +247,13 @@ public class DeviceInformationService {
         payload.put("description",description);
         //往数据库中插入数据
         insertErr(payload);
-        payload.put("status_id", status_id.toString());
         //mqtt通知另一个后台创建维修单
-        mqttService.sendToMqtt("user/Order/error",payload.toString());
+        payload.put("time", MessageUtils.date2Stamp(date_time));
+        mqttService.sendToMqtt("user/Order/error", MessageUtils.Map2jsonString(payload));
         //webSocket通知前端，需要发到管理该台设备的用户那里
         List<String> users = findAllUserByDeviceId(device_id);
         payload.remove("status_id");
+        payload.remove("time");
         payload.put("area_name", locationService.getAreaNameByDevice(device_id));
         //topic 格式为 /queue/error/add
         for (String user : users) {

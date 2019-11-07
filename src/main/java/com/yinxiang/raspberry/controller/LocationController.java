@@ -24,8 +24,8 @@ public class LocationController {
      */
     @ApiOperation(value = "根据用户信息获取所有区域", notes = " 根据用户信息获取所有区域")
     @RequestMapping(value = "/area", method = RequestMethod.GET)
-    public List<Area> getAreaByUser() {
-        return locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
+    public List<Integer> getAreaByUser() {
+        return locationService.getAreaByUser(UserUtils.getCurrentUser().getId());
     }
 
 
