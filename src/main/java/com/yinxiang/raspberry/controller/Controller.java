@@ -169,8 +169,9 @@ public class Controller {
             String[] path = value.getAreapath().substring(1).split("\\.");
             StringBuilder stringBuilder = new StringBuilder();
             for (String p:path) {
-                stringBuilder.append(locationMapper.getAreanameByAreaid(Integer.parseInt(p)));
+                stringBuilder.append(locationMapper.getAreanameByAreaid(Integer.parseInt(p))+"-");
             }
+            stringBuilder.deleteCharAt(stringBuilder.lastIndexOf("-"));
             value.setAreaname(stringBuilder.toString());
         }
         List<String> types = deviceService.getAllType();
