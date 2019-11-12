@@ -28,4 +28,12 @@ public class DeviceInformation {
     public void setSensors(Map<String, String> sensors) {
         this.sensors = sensors;
     }
+
+    @Override
+    public String toString() {
+        return "DeviceInformation{" +
+                "device_id='" + device_id + '\'' +
+                ", sensors=" + sensors +
+                '}';
+    }
 }

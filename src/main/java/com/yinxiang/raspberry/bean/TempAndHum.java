@@ -1,33 +1,60 @@
 package com.yinxiang.raspberry.bean;
 
+import org.influxdb.annotation.Column;
+import org.influxdb.annotation.Measurement;
+
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+
+@Measurement(name = "temp", database = "intellControl")
 public class TempAndHum {
 
     /**
      * 设备号
      */
+    @Column(name = "device_id", tag = true)
     private String device_id;
+
     /**
-     * 创建时间  YY:MM:dd HH:mm:ss
+     * 区域号
      */
-    private String create_time;
+    @Column(name = "area_id", tag = true)
+    private String area_id;
+
+    /**
+     * 时间戳  YY:MM:dd HH:mm:ss
+     */
+    @Column(name = "time")
+    private Instant time;
+
     /**
      * 温度 ℃
      */
-    private String temperature;
+    @Column(name = "temperature")
+    private Double temperature;
+
     /**
      * 湿度 %
      */
-    private String humidity;
+    @Column(name = "humidity")
+    private Double humidity;
 
     /**
-     * 风扇状态
+     * 风扇状态 0=关闭 1=打开
      */
+    @Column(name = "fan_state")
     private Long fan_state;
+
     /**
-     * 风扇转速
+     * 风扇转速 0~100 0=关闭
      */
+    @Column(name = "fan_speed")
     private Long fan_speed;
 
+    /**
+     * 自动控制状态 0=关闭 1=打开
+     */
+    @Column(name = "auto_flag")
     private Long auto_flag;
 
     public TempAndHum() {
@@ -41,36 +68,36 @@ public class TempAndHum {
         this.device_id = device_id;
     }
 
-    public String getCreate_time() {
-        return create_time;
+    public String getArea_id() {
+        return area_id;
     }
 
-    public void setCreate_time(String create_time) {
-        this.create_time = create_time;
+    public void setArea_id(String area_id) {
+        this.area_id = area_id;
     }
 
-    public String getTemperature() {
+    public Instant getTime() {
+        return time;
+    }
+
+    public void setTime(Instant time) {
+        this.time = time;
+    }
+
+    public Double getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(String temperature) {
+    public void setTemperature(Double temperature) {
         this.temperature = temperature;
     }
 
-    public String getHumidity() {
+    public Double getHumidity() {
         return humidity;
     }
 
-    public void setHumidity(String humidity) {
+    public void setHumidity(Double humidity) {
         this.humidity = humidity;
-    }
-
-    public Long getFan_speed() {
-        return fan_speed;
-    }
-
-    public void setFan_speed(Long fan_speed) {
-        this.fan_speed = fan_speed;
     }
 
     public Long getFan_state() {
@@ -81,11 +108,33 @@ public class TempAndHum {
         this.fan_state = fan_state;
     }
 
+    public Long getFan_speed() {
+        return fan_speed;
+    }
+
+    public void setFan_speed(Long fan_speed) {
+        this.fan_speed = fan_speed;
+    }
+
     public Long getAuto_flag() {
         return auto_flag;
     }
 
     public void setAuto_flag(Long auto_flag) {
         this.auto_flag = auto_flag;
+    }
+
+    @Override
+    public String toString() {
+        return "TempAndHum{" +
+                "device_id='" + device_id + '\'' +
+                ", area_id='" + area_id + '\'' +
+                ", time=" + time +
+                ", temperature=" + temperature +
+                ", humidity=" + humidity +
+                ", fan_state=" + fan_state +
+                ", fan_speed=" + fan_speed +
+                ", auto_flag=" + auto_flag +
+                '}';
     }
 }

@@ -59,8 +59,11 @@
         a.area_id = b.aid and a.id = c.device_id and d.id = c.status_id and b.areaname = #{area_name}
     </select>
 
-    <select id="getAreaByUserId" resultMap="AreaMap" parameterType="java.lang.Integer">
-            select areaname from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
+    <select id="getAreaByUser" resultType="java.lang.Integer" parameterType="java.lang.Integer">
+            select a.aid from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
+    </select>
+    <select id="getAreaByUserId" resultType="java.lang.String" parameterType="java.lang.Integer">
+        select areaname from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
     </select>
 
     <select id="getDeviceByUserId" resultMap="LocationMap" parameterType="java.lang.Integer">
@@ -87,6 +90,19 @@
         <collection property="children" ofType="com.yinxiang.raspberry.bean.Area" select="com.yinxiang.raspberry.mapper.LocationMapper.getAreaByPid" column="aid">
         </collection>
     </resultMap>
+
+    <select id="getAreaNameByDevice" resultType="java.lang.String" parameterType="java.lang.String">
+        select a.areaname
+        from device d, area a
+        where a.aid = d.area_id and d.id = #{device_id}
+    </select>
+
+    <select id="getAreaIdByUserId" resultType="java.lang.String" parameterType="java.lang.Integer">
+        select a.aid
+        from area a, user_area ua, user u
+        where u.id = ua.user_id and ua.area_id = a.aid and u.id = #{id};
+    </select>
+
     <select id="getAreaByPid" resultMap="BaseResultMap">
         select a.* from area a where a.`parentId`=#{pid}
     </select>

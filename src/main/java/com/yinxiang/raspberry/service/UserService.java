@@ -16,8 +16,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 
 @Service
@@ -160,8 +160,12 @@ public class UserService implements UserDetailsService {
         return result;
     }
 
-
-
-
-
+    /**
+     * 返回管理这台设备的所有管理人员，返回的是用户名
+     * @param device_id 设备号
+     * @return
+     */
+    public List<String> findAllUserByDeviceId(String device_id){
+        return userMapper.findAllUserByDeviceId(device_id);
+    }
 }

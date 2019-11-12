@@ -86,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 //.defaultSuccessUrl()  这个可以用在登录成功后默认跳转的页面，比如用户首页
-                //.loginPage("/login_p")
+                .loginPage("/login_p")
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")

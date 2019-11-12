@@ -88,8 +88,8 @@
         update
         <include refid="status_table"></include>
         set
-        temp_status = #{status_id}
-        where device_id = #{device_id} and temp_status != #{status_id}
+        status_id = #{status_id}
+        where device_id = #{device_id}
     </update>
 
     <update id="updateOnlineBySet" parameterType="java.util.HashSet">
@@ -98,6 +98,17 @@
         set
         temp_status = 1
         where device_id IN 
+        <foreach item="item" index="index" collection="collection" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="updateOnlineByList" parameterType="java.util.ArrayList">
+        UPDATE
+        <include refid="status_table"></include>
+        set
+        temp_status = 1
+        where device_id IN
         <foreach item="item" index="index" collection="collection" open="(" separator="," close=")">
             #{item}
         </foreach>
@@ -153,4 +164,17 @@
         where device_id = #{device_id} and status_id = #{status_id} and description = #{description}
     </delete>
 
+    <update id="connect" parameterType="java.lang.String">
+        update
+        <include refid="status_table"></include>
+        set status_id = 1
+        where device_id = #{device_id}
+    </update>
+
+    <update id="disconnect" parameterType="java.lang.String">
+        update
+        <include refid="status_table"></include>
+        set status_id = 2
+        where device_id = #{device_id}
+    </update>
 </mapper>

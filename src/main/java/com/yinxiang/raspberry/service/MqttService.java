@@ -19,8 +19,7 @@ public class MqttService {
         mqttSender.sendToMqtt(topic, data);
     }
 
-    public void sentToMqtt(String topic, int qos, String data){
+    public void sendToMqtt(String topic, int qos, String data){
         mqttSender.sendToMqtt(topic, qos, data);
     }
-
 }

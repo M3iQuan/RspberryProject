@@ -3,6 +3,7 @@ package com.yinxiang.raspberry.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import com.yinxiang.raspberry.model.Device;
+import org.springframework.security.core.parameters.P;
 
 import java.util.List;
 
@@ -22,4 +23,5 @@ public interface DeviceMapper {
 
     int addDevice(@Param("device") Device device);
     int addDevice_status(@Param("device_id") String device_id,@Param("statusname") String statusname);
+    int deleteDevice(@Param("device_id") String device_id);
 }

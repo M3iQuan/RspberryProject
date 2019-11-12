@@ -4,6 +4,7 @@ import com.yinxiang.raspberry.bean.Device;
 import com.yinxiang.raspberry.bean.ErrDevices;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,8 @@ public interface DevicesMapper {
 
     void updateOnlineBySet(HashSet<String> data);
 
+    void updateOnlineByList(ArrayList<String> data);
+
     //3.更新所有设备状态
     void updateStates();
 
@@ -48,4 +51,9 @@ public interface DevicesMapper {
 
     //根据用户信息获取所在区域的所有异常/故障信息
     List<ErrDevices> findErrDeviceByUserId(@Param("id") Integer id);
+
+    //设备上线
+    void connect(@Param("device_id") String device_id);
+    //设备下线
+    void disconnect(@Param("device_id") String device_id);
 }

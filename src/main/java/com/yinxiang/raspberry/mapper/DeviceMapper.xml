@@ -147,6 +147,9 @@
     <insert id="addDevice_status">
         insert into device_status(device_id,status_id,temp_status) values (#{device_id},(select id from status where name = #{statusname}),2)
     </insert>
+    <delete id="deleteDevice" parameterType="java.lang.String">
+        delete from device where id = #{device_id}
+    </delete>
 
 
 

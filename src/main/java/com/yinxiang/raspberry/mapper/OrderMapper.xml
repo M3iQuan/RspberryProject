@@ -11,7 +11,7 @@
         </if>
     </select>
     <select id="getOrderByDid" resultType="com.yinxiang.raspberry.model.Order">
-        select * from Order_staff where id = #{did}
+        select * from Order_staff where device_id = #{device_id}
     </select>
 
 </mapper>
