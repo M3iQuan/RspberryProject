@@ -3,6 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.yinxiang.raspberry.mapper.OrderMapper">
+    <resultMap id="BaseResultMap" type="com.yinxiang.raspberry.model.Order">
+        <id column="id" property="id"/>
+        <result column="device_id" property="device_id"/>
+        <result column="order_status" property="order_status"/>
+        <result column="order_time" property="order_time"/>
+        <result column="description" property="description"/>
+        <result column="mstaff_id" property=""
+    </resultMap>
 
     <select id="getOrder" resultType="com.yinxiang.raspberry.model.Order">
         select * from Order_staff where

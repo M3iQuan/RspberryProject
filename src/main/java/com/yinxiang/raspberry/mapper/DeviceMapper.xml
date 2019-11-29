@@ -150,7 +150,8 @@
     <delete id="deleteDevice" parameterType="java.lang.String">
         delete from device where id = #{device_id}
     </delete>
-
-
+    <select id="existDevice" resultMap="BaseResultMap">
+        select * from device where id = #{device_id}
+    </select>
 
 </mapper>

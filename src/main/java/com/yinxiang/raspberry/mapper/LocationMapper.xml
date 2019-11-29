@@ -62,7 +62,7 @@
     <select id="getAreaByUser" resultType="java.lang.Integer" parameterType="java.lang.Integer">
             select a.aid from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
     </select>
-    <select id="getAreaByUserId" resultType="java.lang.String" parameterType="java.lang.Integer">
+    <select id="getAreaByUserId" resultMap="AreaMap" parameterType="java.lang.Integer">
         select areaname from user u,area a,user_area ua where u.id = ua.user_id and a.aid = ua.area_id and u.id = #{id}
     </select>
 

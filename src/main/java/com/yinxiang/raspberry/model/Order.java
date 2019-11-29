@@ -6,6 +6,11 @@ public class Order {
     private String order_status;
     private String order_time;
     private String description;
+    private String mstaff_id;
+    private String mstaff_name;
+    private String phoneNumber;
+
+
 
     public String getId() {
         return id;

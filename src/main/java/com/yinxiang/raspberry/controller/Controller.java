@@ -1,15 +1,13 @@
 package com.yinxiang.raspberry.controller;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.yinxiang.raspberry.bean.Area;
 import com.yinxiang.raspberry.mapper.LocationMapper;
 import com.yinxiang.raspberry.model.*;
 import com.yinxiang.raspberry.service.*;
+import org.omg.CORBA.OBJ_ADAPTER;
 import org.springframework.beans.factory.annotation.Autowired;
-
-
 import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -86,8 +84,7 @@ public class Controller {
         }
         List<Area> areas = locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
         List<String> areaname = new ArrayList();
-        for (Area area : areas
-        ) {
+        for (Area area : areas) {
             areaname.add(area.getArea_name());
         }
         Map<String, Object> map = new HashMap<>();
@@ -185,34 +182,40 @@ public class Controller {
     }
 
     @RequestMapping(value = "/updatedevice", method = RequestMethod.POST)
-    public Result updateDevice(Device device) {
-        Result result = new Result();
-        if (deviceService.updateDevice(device) != 0) {
-            result.setMsg("更新成功!");
-            result.setSuccess(true);
-            result.setStatus(200);
-            return result;
+    public Map<String,Object> updateDevice(Device device) {  //status默认传过来的是正常了
+        Map<String, Object> map = new HashMap<>();
+        if (deviceService.existDevice(device.getId())!=null) {
+            map.put("status",400 );
+            map.put("msg","设备名已存在" );
+            return map;
         }
-        result.setMsg("更新失败!");
-        result.setSuccess(false);
-        result.setStatus(400);
-        return result;
+        if (deviceService.updateDevice(device) != 0) {
+            map.put("status",200 );
+            map.put("msg","更新成功" );
+        }else {
+            map.put("status",400 );
+            map.put("msg","更新失败" );   //现在是所有更新不成功的错误都是这个提示，以后应该要改，不知道还有哪些错误会导致更新错误。
+        }
+        return map;
     }
 
     @RequestMapping(value = "/addDevice", method = RequestMethod.POST)
-    public Result addDevice(Device device) {
+    public Map<String,Object> addDevice(Device device) {
+        Map<String,Object> map = new HashMap<>();
         System.out.println("device:" + device.toString());
-        Result result = new Result();
+        if(deviceService.existDevice(device.getId())!=null) {
+           map.put("msg","设备名已存在" );
+           map.put("status",402 );
+            return map;
+        }
         if (deviceService.addDevice(device) == 2) {
-            result.setMsg("添加成功!");
-            result.setSuccess(true);
-            result.setStatus(200);
-            return result;
+            map.put("msg","添加成功" );
+            map.put("status",200 );
+            return map;
         } else {
-            result.setMsg("添加失败!");
-            result.setSuccess(false);
-            result.setStatus(400);
-            return result;
+            map.put("msg","添加失败" );
+            map.put("status",400 );
+            return map;
         }
     }
     @RequestMapping(value = "/deleteDevice", method = RequestMethod.POST)
@@ -230,6 +233,11 @@ public class Controller {
             result.setStatus(400);
             return result;
         }
+    }
+
+    @RequestMapping(value = "/batchDelete",method = RequestMethod.POST)
+    public Map<String,Object> batchDeleteDevice(String[] device_id) {
+        return deviceService.batchDeleteDevice(device_id);
     }
 
     @RequestMapping(value = "/AuthorityAllocation", method = RequestMethod.POST) //权限分配

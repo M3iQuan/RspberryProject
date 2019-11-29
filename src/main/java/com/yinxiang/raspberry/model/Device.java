@@ -91,4 +91,20 @@ public class Device {
     public void setAreapath(String areapath) {
         this.areapath = areapath;
     }
+
+    @Override
+    public String toString() {
+        return "Device{" +
+                "id='" + id + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", description='" + description + '\'' +
+                ", statusname='" + statusname + '\'' +
+                ", type='" + type + '\'' +
+                ", areaname='" + areaname + '\'' +
+                ", areapath='" + areapath + '\'' +
+                ", sensor_value=" + sensor_value +
+                ", create_time='" + create_time + '\'' +
+                '}';
+    }
 }

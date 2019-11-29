@@ -5,7 +5,9 @@ import com.yinxiang.raspberry.model.Device;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DeviceService {
@@ -26,12 +28,7 @@ public class DeviceService {
     }
 
     public int updateDevice(Device device) {
-        System.out.println("type:"+device.getType());
-        if(device.getStatusname() != null) {
-            return deviceMapper.updateDevice(device)+deviceMapper.updateDevice_status(device);
-        }else {
             return deviceMapper.updateDevice(device);
-        }
     }
 
     public List<String> getAllType() {
@@ -50,5 +47,24 @@ public class DeviceService {
         return deviceMapper.deleteDevice(device_id);
     }
 
+    public Map<String,Object> batchDeleteDevice(String[] device_id){
+        Map<String,Object> map = new HashMap<>();
+        int count = 0;
+        for (String ids:device_id) {
+            count += deviceMapper.deleteDevice(ids);
+            System.out.println("删除"+ids);
+        }
+        if(count==device_id.length) {
+            map.put("msg","全部删除成功" );
+            map.put("status",200 );
+        }else {
+            map.put("msg","没有全部删除" );
+            map.put("status",400 );
+        }
+        return map;
+    }
 
+    public Device existDevice(String device_id) {
+        return deviceMapper.existDevice(device_id);
+    }
 }
