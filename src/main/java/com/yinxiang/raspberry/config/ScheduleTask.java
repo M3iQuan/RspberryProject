@@ -5,7 +5,9 @@ import com.yinxiang.raspberry.service.DeviceInformationService;
 import com.yinxiang.raspberry.service.MqttService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -13,19 +15,14 @@ import org.springframework.stereotype.Component;
 @EnableScheduling
 public class ScheduleTask {
     @Autowired
-    DeviceInformationService deviceInformationService;
-    @Autowired
-    MqttService mqttService;
-    @Autowired
-    InfluxDbUtils influxDbUtils;
-
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     //@Async
     //指定时间间隔，每5分钟执行一次
-    //@Scheduled(cron = "*/15 * * * * ?")
+    @Scheduled(cron = "*/5 * * * * ?")
     //添加定时任务
-    //public void configureTasks(){
-
+    public void configureTasks(){
+        simpMessagingTemplate.convertAndSend("/topic/online","online");
         //System.out.println("count of data:" + test.count_temp);
         // System.out.println("write data");
         //influxDbUtils.getInfluxDB().write(test.getTemp_data());
@@ -45,7 +42,7 @@ public class ScheduleTask {
             System.out.println("total data number of protector: " + test.getProtector_data().size());
             test.getProtector_data().clear();
         }*/
-    //}
+    }
 
     //@Scheduled(cron = "*/20 * * * * ?")
     //添加定时任务

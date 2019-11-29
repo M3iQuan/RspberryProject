@@ -86,8 +86,7 @@ public class Controller {
         }
         List<Area> areas = locationService.getAreaByUserId(UserUtils.getCurrentUser().getId());
         List<String> areaname = new ArrayList();
-        for (Area area : areas
-        ) {
+        for (Area area : areas) {
             areaname.add(area.getArea_name());
         }
         Map<String, Object> map = new HashMap<>();
@@ -96,7 +95,7 @@ public class Controller {
 
         List<Role> allRole = roleService.getAllRole();
 
-
+        Long count = webService.getCountByKeywords(keywords, username, description, rolename, areaname,issuper);
         for (User value : userByPage) { //这里是把展示的用户所属的区域存到areaname2，然后存到user发上去。
             List<String> areaname2 = new ArrayList();
             List<Area> areas2 = locationService.getAreaByUserId(value.getId());
@@ -107,7 +106,7 @@ public class Controller {
             value.setAreaname(areaname2);
         }
 
-        Long count = webService.getCountByKeywords(keywords, username, description, rolename, areaname,issuper);
+
         map.put("users", userByPage);
         map.put("roles", allRole);   //前端用来权限分配的时候展示的
         map.put("count", count);

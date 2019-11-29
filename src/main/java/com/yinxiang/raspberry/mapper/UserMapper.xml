@@ -43,6 +43,9 @@
         <if test="issuper==0">
             AND u.id in (select uid from user_role ur where ur.rid != 1)
         </if>
+        <if test="issuper==1">
+            AND u.id != 13
+        </if>
         <if test="username!=null and username!=''">
             AND username=#{username}
         </if>
@@ -70,6 +73,9 @@
         </foreach>
         <if test="issuper==0">
             AND u.id in (select uid from user_role ur where ur.rid != 1)
+        </if>
+        <if test="issuper==1">
+            AND u.id != 13
         </if>
         <if test="username!=null and username!=''">
             AND username=#{username}
