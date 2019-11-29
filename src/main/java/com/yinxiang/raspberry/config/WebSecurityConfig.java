@@ -176,14 +176,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 })
                 .permitAll()
                 .and()
-                .sessionManagement()
-                .invalidSessionUrl("/status/xiaji1")
-                .and()
                 .csrf()
                 .disable()
                 .cors();
 
-        http.sessionManagement().maximumSessions(1).expiredUrl("/status/xiaji2");
+        http.sessionManagement().maximumSessions(1);
     }
     @Bean
     CustomFilterInvocationSecurityMetadataSource cfisms() {
